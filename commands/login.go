@@ -1,0 +1,154 @@
+package commands
+
+import (
+	"blast/api"
+	"blast/api/consts"
+	"blast/db"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+var login = Command{
+	Create: discord.SlashCommandCreate{
+		Name:        "login",
+		Description: "Login to your Epic Games account.",
+	},
+	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
+		blast := api.New()
+
+		clientCredentials, err := blast.GetClientCredentialsEOS("3e13c5c57f594a578abe516eecb673fe", "530e316c337e409893c55ec44f22cd62")
+		if err != nil {
+			return err
+		}
+
+		deviceAuthorization, err := blast.GetDeviceAuthorizationEOS(clientCredentials.AccessToken)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		expires := time.Now().Add(time.Minute * 2).Unix()
+
+		embed := discord.NewEmbedBuilder().
+			// SetAuthorIcon(event.). // TODO set author icon to bot user avatar
+			SetColor(0xFB5A32).
+			SetTimestamp(time.Now()).
+			SetTitle("Add a new account <a:blastrocket:1094632950395588608>").
+			SetDescriptionf("**Login Instructions:**\n**1.** Click the `Login` button below.\n**2.** Click the `Confirm` button on the epic games page.\n**3.** Wait a few seconds for the bot to process login.\n\n***This interaction will timeout <t:%d:R>.***", expires).
+			Build()
+
+		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+			SetEmbeds(embed).
+			AddActionRow(
+				discord.NewLinkButton("Login", deviceAuthorization.VerificationUriComplete),
+				discord.NewDangerButton("Cancel", "cancel-login"),
+			).
+			Build(),
+		)
+		if err != nil {
+			return err
+		}
+
+		deviceCodeCredentials, err := blast.WaitForDeviceCodeAcceptEOS("3e13c5c57f594a578abe516eecb673fe", "530e316c337e409893c55ec44f22cd62", deviceAuthorization.DeviceCode)
+		if err != nil {
+			return err
+		}
+
+		exchangeCode, err := blast.GetExchangeCodeEOS(deviceCodeCredentials)
+		if err != nil {
+			return err
+		}
+
+		// decode this refresh jwt and get jti for hex format refresh token that expires after ~6 months (170 days) and can be infinitly refreshed
+		exchangeCredentials, err := blast.ExchangeCodeLoginEOS(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, exchangeCode.Code)
+		if err != nil {
+			log.Println("s")
+			return err
+		}
+
+		decodedRefreshJwtPayload, err := base64Decode(strings.Split(exchangeCredentials.RefreshToken, ".")[1])
+		if err != nil {
+			log.Println("e")
+			return err
+		}
+
+		refreshPayload := api.DecodedRefreshTokenJwtPayload{}
+
+		err = json.Unmarshal(decodedRefreshJwtPayload, &refreshPayload)
+		if err != nil {
+			log.Println("y")
+			return err
+		}
+
+		userId := event.User().ID.String()
+
+		_, err = db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
+
+		col := db.GetCollection("users")
+
+		user := db.UserEntry{
+			ID:        primitive.NewObjectID().Hex(),
+			DiscordID: userId,
+			Accounts: []db.EpicAccountEntry{
+				{
+					ID:               exchangeCredentials.AccountId,
+					RefreshToken:     refreshPayload.Jti,
+					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
+					ClientId:         exchangeCredentials.ClientId,
+				},
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		if err == nil { // user exists
+			_, err := col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$push": bson.M{"accounts": bson.M{
+				"id":               exchangeCredentials.AccountId,
+				"refreshToken":     refreshPayload.Jti,
+				"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
+				"clientId":         exchangeCredentials.ClientId,
+			}}}, options.Update().SetUpsert(true))
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err = col.InsertOne(context.Background(), user)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContentf("Logged in as `%s`!", deviceCodeCredentials.AccountId).Build())
+		if err != nil {
+			return err
+		}
+
+		return nil
+	},
+}
+
+func base64Decode(s string) ([]byte, error) {
+	return base64.RawURLEncoding.DecodeString(s)
+}
+
+func RespondLoginCanceled(event *events.ApplicationCommandInteractionCreate) error {
+	_, err := event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContent("Login canceled!").Build())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// func getAv(user discord.User, format discord.ImageFormat) string {
+// 	return *user.AvatarURL(discord.WithFormat(format), discord.WithSize(1024))
+// }
