@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"blast/api"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -20,14 +21,18 @@ type CommandList []discord.ApplicationCommandCreate
 var list = CommandList{}
 var handlers = map[string]CommandHandler{}
 
+var blast = api.New()
+
 func (c Command) register() {
 	list = append(list, c.Create)
 	handlers[c.Create.Name] = c.Handler
 }
 
 func Setup() CommandList {
+	auth.register()
 	login.register()
 	logout.register()
+	mnemonic.register()
 
 	return list
 }

@@ -24,8 +24,6 @@ var login = Command{
 		Description: "Login to your Epic Games account.",
 	},
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
-		blast := api.New()
-
 		clientCredentials, err := blast.GetClientCredentialsEOS("3e13c5c57f594a578abe516eecb673fe", "530e316c337e409893c55ec44f22cd62")
 		if err != nil {
 			return err
@@ -71,13 +69,11 @@ var login = Command{
 		// decode this refresh jwt and get jti for hex format refresh token that expires after ~6 months (170 days) and can be infinitly refreshed
 		exchangeCredentials, err := blast.ExchangeCodeLoginEOS(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, exchangeCode.Code)
 		if err != nil {
-			log.Println("s")
 			return err
 		}
 
 		decodedRefreshJwtPayload, err := base64Decode(strings.Split(exchangeCredentials.RefreshToken, ".")[1])
 		if err != nil {
-			log.Println("e")
 			return err
 		}
 
@@ -85,7 +81,6 @@ var login = Command{
 
 		err = json.Unmarshal(decodedRefreshJwtPayload, &refreshPayload)
 		if err != nil {
-			log.Println("y")
 			return err
 		}
 
@@ -104,10 +99,13 @@ var login = Command{
 					RefreshToken:     refreshPayload.Jti,
 					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
 					ClientId:         exchangeCredentials.ClientId,
+					AutoDailyClaim:   false,
 				},
 			},
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			SelectedAccount:    0,
+			AutoDailyClaimBulk: false,
+			CreatedAt:          time.Now(),
+			UpdatedAt:          time.Now(),
 		}
 
 		if err == nil { // user exists
@@ -116,6 +114,7 @@ var login = Command{
 				"refreshToken":     refreshPayload.Jti,
 				"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
 				"clientId":         exchangeCredentials.ClientId,
+				"autoDailyClaim":   false,
 			}}}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err
@@ -140,14 +139,14 @@ func base64Decode(s string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(s)
 }
 
-func RespondLoginCanceled(event *events.ApplicationCommandInteractionCreate) error {
-	_, err := event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContent("Login canceled!").Build())
-	if err != nil {
-		return err
-	}
+// func respondLoginCanceled(event *events.ApplicationCommandInteractionCreate) error {
+// 	_, err := event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContent("Login canceled!").Build())
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // func getAv(user discord.User, format discord.ImageFormat) string {
 // 	return *user.AvatarURL(discord.WithFormat(format), discord.WithSize(1024))
