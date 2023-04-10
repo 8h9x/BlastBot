@@ -24,7 +24,7 @@ var login = Command{
 		Description: "Login to your Epic Games account.",
 	},
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
-		clientCredentials, err := blast.GetClientCredentialsEOS("3e13c5c57f594a578abe516eecb673fe", "530e316c337e409893c55ec44f22cd62")
+		clientCredentials, err := blast.GetClientCredentialsEOS(consts.UEFN_CLIENT_ID, consts.UEFN_CLIENT_SECRET)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ var login = Command{
 			return err
 		}
 
-		deviceCodeCredentials, err := blast.WaitForDeviceCodeAcceptEOS("3e13c5c57f594a578abe516eecb673fe", "530e316c337e409893c55ec44f22cd62", deviceAuthorization.DeviceCode)
+		deviceCodeCredentials, err := blast.WaitForDeviceCodeAcceptEOS(consts.UEFN_CLIENT_ID, consts.UEFN_CLIENT_SECRET, deviceAuthorization.DeviceCode)
 		if err != nil {
 			return err
 		}

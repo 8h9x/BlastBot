@@ -32,6 +32,7 @@ func Setup() CommandList {
 	auth.register()
 	login.register()
 	logout.register()
+	mcp.register()
 	mnemonic.register()
 
 	return list

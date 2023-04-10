@@ -1,5 +1,7 @@
 package consts
 
+// https://egs.jaren.wtf/
+
 const (
 	AMONGUS_CLIENT_ID     = "xyza7891qtrmoYLr86we6DlfCA1RRsp8"
 	AMONGUS_CLIENT_SECRET = "nGThQanzvthA2HPaARXe/xutzsKyx5WJveNkBx44ti4"
