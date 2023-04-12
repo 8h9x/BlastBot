@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -28,30 +28,36 @@ var auth = Command{
 				Name:        "exchange",
 				Description: "Generates an exchange code.",
 			},
-			discord.ApplicationCommandOptionSubCommand{
-				Name:        "refresh",
-				Description: "Generates a refresh token",
-			},
 		},
 	},
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
-		embed := discord.NewEmbedBuilder().
-			// SetAuthorIcon(event.). // TODO set author icon to bot user avatar
-			SetColor(0xFB5A32).
-			SetTimestamp(time.Now()).
-			SetTitle("Test").
-			SetDescription("test").
-			Build()
+		data := event.SlashCommandInteractionData()
 
-		err := event.CreateMessage(discord.NewMessageCreateBuilder().
-			SetEmbeds(embed).
-			AddActionRow(
-				discord.NewDangerButton("test", "cancel-login"),
-			).
-			Build(),
-		)
-		if err != nil {
-			return err
+		// userId := event.User().ID.String()
+
+		// user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
+		// if err != nil {
+		// 	return err
+		// }
+
+		// refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
+		// if err != nil {
+		// 	return err
+		// }
+
+		// log.Println(refreshCredentials)
+
+		switch *data.SubCommandName {
+		case "bearer":
+
+		case "client":
+
+		case "device":
+
+		case "exchange":
+
+		default:
+			return fmt.Errorf("unknown subcommand")
 		}
 
 		return nil

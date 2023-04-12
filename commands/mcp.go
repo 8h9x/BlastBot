@@ -1,10 +1,17 @@
 package commands
 
 import (
+	"blast/api/consts"
+	"blast/db"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var mcp = Command{
@@ -14,7 +21,7 @@ var mcp = Command{
 		Options: []discord.ApplicationCommandOption{
 			discord.ApplicationCommandOptionString{
 				Name:        "operation",
-				Description: "The name of the operation to perform (ex. QueryProfile)", // unsure yet if case-sensitive (case sensitive).
+				Description: "The name of the operation to perform (ex. QueryProfile)", // unsure yet if case-sensitive.
 				Required:    true,
 			},
 			discord.ApplicationCommandOptionString{
@@ -45,8 +52,83 @@ var mcp = Command{
 		},
 	},
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
-		return fmt.Errorf("not implemented")
+		data := event.SlashCommandInteractionData()
+
+		userId := event.User().ID.String()
+
+		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
+		if err != nil {
+			return err
+		}
+
+		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
+		if err != nil {
+			return err
+		}
+
+		customBodyURL := data.Attachment("body").URL
+		customBody := "{}"
+
+		if customBodyURL != "" {
+			body, err := fetchJSON(data.Attachment("body").URL)
+			if err != nil {
+				return err
+			}
+
+			customBody = body
+		}
+
+		res, err := blast.ProfileOperationStr(refreshCredentials, data.String("operation"), data.String("profile"), customBody)
+		if err != nil {
+			return err
+		}
+
+		log.Println(res)
+
+		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+			AddFile(fmt.Sprintf("%s.%s.blast.json", strings.ToLower(data.String("operation")), data.String("profile")), "Profile operation response.", res).
+			Build(),
+		)
+		if err != nil {
+			return err
+		}
+
+		res.Close()
+
+		return nil
 	},
+}
+
+// func FetchJSON(url string) (interface{}, error) {
+// 	resp, err := http.Get(url)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	defer resp.Body.Close()
+
+// 	var res interface{}
+// 	err = json.NewDecoder(resp.Body).Decode(&res)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return res, nil
+// }
+
+func fetchJSON(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }
 
 // https://github.com/LeleDerGrasshalmi/FortniteEndpointsDocumentation/tree/main/Fortnite/MCP
