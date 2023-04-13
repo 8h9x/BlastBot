@@ -12,19 +12,22 @@ import (
 type CommandHandler func(event *events.ApplicationCommandInteractionCreate) error
 
 type Command struct {
-	Create  discord.SlashCommandCreate
-	Handler CommandHandler
+	Create        discord.SlashCommandCreate
+	Handler       CommandHandler
+	LoginRequired bool
 }
 
 type CommandList []discord.ApplicationCommandCreate
 
 var list = CommandList{}
 var handlers = map[string]CommandHandler{}
+var cmds = map[string]Command{}
 
 var blast = api.New()
 
 func (c Command) register() {
 	list = append(list, c.Create)
+	cmds[c.Create.Name] = c
 	handlers[c.Create.Name] = c.Handler
 }
 
@@ -48,6 +51,10 @@ func Handler(name string) (CommandHandler, bool) {
 	}
 
 	return nil, false
+}
+
+func RequiresLogin(name string) bool {
+	return cmds[name].LoginRequired
 }
 
 func FriendlyEmbed(e *discord.EmbedBuilder) *discord.EmbedBuilder {

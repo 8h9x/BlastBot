@@ -4,7 +4,7 @@ import (
 	"blast/api/consts"
 	"blast/db"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -54,9 +54,7 @@ var mcp = Command{
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
 		data := event.SlashCommandInteractionData()
 
-		userId := event.User().ID.String()
-
-		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
+		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
 		if err != nil {
 			return err
 		}
@@ -66,11 +64,10 @@ var mcp = Command{
 			return err
 		}
 
-		customBodyURL := data.Attachment("body").URL
-		customBody := "{}"
+		operation, profileId, customBodyURL, customBody := data.String("operation"), data.String("profile"), data.Attachment("body").URL, "{}"
 
 		if customBodyURL != "" {
-			body, err := fetchJSON(data.Attachment("body").URL)
+			body, err := fetchJSON(customBodyURL)
 			if err != nil {
 				return err
 			}
@@ -78,7 +75,7 @@ var mcp = Command{
 			customBody = body
 		}
 
-		res, err := blast.ProfileOperationStr(refreshCredentials, data.String("operation"), data.String("profile"), customBody)
+		res, err := blast.ProfileOperationStr(refreshCredentials, operation, profileId, customBody)
 		if err != nil {
 			return err
 		}
@@ -86,7 +83,7 @@ var mcp = Command{
 		log.Println(res)
 
 		err = event.CreateMessage(discord.NewMessageCreateBuilder().
-			AddFile(fmt.Sprintf("%s.%s.blast.json", strings.ToLower(data.String("operation")), data.String("profile")), "Profile operation response.", res).
+			AddFile(fmt.Sprintf("%s.%s.blast.json", strings.ToLower(operation), profileId), "Profile operation response.", res).
 			Build(),
 		)
 		if err != nil {
@@ -97,6 +94,7 @@ var mcp = Command{
 
 		return nil
 	},
+	LoginRequired: true,
 }
 
 // func FetchJSON(url string) (interface{}, error) {
@@ -123,7 +121,7 @@ func fetchJSON(url string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

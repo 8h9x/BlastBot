@@ -3,7 +3,7 @@ package db
 import "time"
 
 type EpicAccountEntry struct {
-	ID               string    `bson:"accountId"`
+	AccountID        string    `bson:"accountId"`
 	RefreshToken     string    `bson:"refreshToken"`
 	RefreshExpiresAt time.Time `bson:"refreshExpiresAt"`
 	ClientId         string    `bson:"clientId"`

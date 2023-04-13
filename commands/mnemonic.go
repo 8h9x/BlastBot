@@ -74,6 +74,7 @@ var mnemonic = Command{
 			return fmt.Errorf("unknown subcommand")
 		}
 	},
+	LoginRequired: true,
 }
 
 // /mnemonic favorites list

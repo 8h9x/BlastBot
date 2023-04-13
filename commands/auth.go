@@ -62,6 +62,7 @@ var auth = Command{
 
 		return nil
 	},
+	LoginRequired: true,
 }
 
 // ApplicationCommandOptionSubCommand

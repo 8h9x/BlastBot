@@ -18,6 +18,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MAX SAVED ACCOUNTS IS 10
+
 var login = Command{
 	Create: discord.SlashCommandCreate{
 		Name:        "login",
@@ -95,7 +97,7 @@ var login = Command{
 			DiscordID: userId,
 			Accounts: []db.EpicAccountEntry{
 				{
-					ID:               exchangeCredentials.AccountId,
+					AccountID:        exchangeCredentials.AccountId,
 					RefreshToken:     refreshPayload.Jti,
 					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
 					ClientId:         exchangeCredentials.ClientId,
@@ -110,7 +112,7 @@ var login = Command{
 
 		if err == nil { // user exists
 			_, err := col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$push": bson.M{"accounts": bson.M{
-				"id":               exchangeCredentials.AccountId,
+				"accountId":        exchangeCredentials.AccountId,
 				"refreshToken":     refreshPayload.Jti,
 				"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
 				"clientId":         exchangeCredentials.ClientId,
@@ -133,6 +135,7 @@ var login = Command{
 
 		return nil
 	},
+	LoginRequired: false,
 }
 
 func base64Decode(s string) ([]byte, error) {

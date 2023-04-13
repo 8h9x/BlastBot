@@ -15,6 +15,7 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func main() {
@@ -49,6 +50,24 @@ func main() {
 		}),
 		bot.WithEventListenerFunc(func(event *events.ApplicationCommandInteractionCreate) {
 			data := event.SlashCommandInteractionData()
+
+			user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
+			if err != nil {
+				panic(err)
+			}
+
+			// check user logged in
+			if len(user.Accounts) == 0 && commands.RequiresLogin(data.CommandName()) {
+				event.CreateMessage(discord.NewMessageCreateBuilder().
+					SetEmbeds(discord.NewEmbedBuilder().
+						SetDescription("You don't have any accounts saved!").
+						Build(),
+					).
+					Build(),
+				)
+
+				return
+			}
 
 			if handler, ok := commands.Handler(data.CommandName()); ok {
 				go func() {
