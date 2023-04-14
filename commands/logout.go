@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"blast/api/consts"
 	"blast/db"
 	"context"
 	"fmt"
@@ -43,8 +44,28 @@ var logout = Command{
 
 		logOutOptions := make([]discord.StringSelectMenuOption, 0)
 
-		for _, account := range user.Accounts {
-			logOutOptions = append(logOutOptions, discord.NewStringSelectMenuOption(account.AccountID, account.AccountID))
+		for i, account := range user.Accounts {
+			refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
+			if err != nil {
+				return err
+			}
+
+			accountInfo, err := blast.FetchAccountInformation(refreshCredentials)
+			if err != nil {
+				return err
+			}
+
+			logOutOptions = append(logOutOptions, discord.NewStringSelectMenuOption(accountInfo.DisplayName, account.AccountID+fmt.Sprint(i)))
+		}
+
+		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
+		if err != nil {
+			return err
+		}
+
+		account, err := blast.FetchAccountInformation(refreshCredentials)
+		if err != nil {
+			return err
 		}
 
 		col := db.GetCollection("users")
@@ -54,24 +75,24 @@ var logout = Command{
 			return err
 		}
 
-		return fmt.Errorf("successfully logged out of %s", user.Accounts[user.SelectedAccount].AccountID)
+		// return fmt.Errorf("successfully logged out of %s", account.DisplayName)
 
 		// return nil
 
-		// err = event.CreateMessage(discord.NewMessageCreateBuilder().
-		// 	// SetEmbeds(embed).
-		// 	AddActionRow(
-		// 		discord.NewStringSelectMenu("account", "Select an account to log out of").
-		// 			AddOptions(logOutOptions...),
-		// 		// discord.NewDangerButton("Cancel", "cancel-logout"),
-		// 	).
-		// 	Build(),
-		// )
-		// if err != nil {
-		// 	return err
-		// }
+		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+			// SetEmbeds(embed).
+			AddActionRow(
+				discord.NewStringSelectMenu("account", "Select an account to log out of").
+					AddOptions(logOutOptions...),
+				// discord.NewDangerButton("Cancel", "cancel-logout"),
+			).
+			Build(),
+		)
+		if err != nil {
+			return err
+		}
 
-		// return nil
+		return fmt.Errorf("successfully logged out of %s", account.DisplayName)
 
 		// embed := discord.NewEmbedBuilder().
 		// 	// SetAuthorIcon(event.). // TODO set author icon to bot user avatar

@@ -2,20 +2,24 @@ package db
 
 import "time"
 
+type AccountFlags struct {
+	AutoDailyClaim bool `bson:"autoDailyClaim"`
+}
+
 type EpicAccountEntry struct {
 	AccountID        string    `bson:"accountId"`
 	RefreshToken     string    `bson:"refreshToken"`
 	RefreshExpiresAt time.Time `bson:"refreshExpiresAt"`
 	ClientId         string    `bson:"clientId"`
-	AutoDailyClaim   bool      `bson:"autoDailyClaim"`
+	Flags            AccountFlags
 }
 
 type UserEntry struct {
-	ID                 string             `bson:"_id"`
-	DiscordID          string             `bson:"discordId"`
-	Accounts           []EpicAccountEntry `bson:"accounts"`
-	SelectedAccount    int                `bson:"selectedAccount"`
-	AutoDailyClaimBulk bool               `bson:"autoDailyClaimBulk"`
-	CreatedAt          time.Time          `bson:"createdAt"`
-	UpdatedAt          time.Time          `bson:"updatedAt"`
+	ID              string             `bson:"_id"`
+	DiscordID       string             `bson:"discordId"`
+	Accounts        []EpicAccountEntry `bson:"accounts"`
+	SelectedAccount int                `bson:"selectedAccount"`
+	BulkFlags       AccountFlags
+	CreatedAt       time.Time `bson:"createdAt"`
+	UpdatedAt       time.Time `bson:"updatedAt"`
 }

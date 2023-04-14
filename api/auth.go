@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO: Massive amount of de-duplication needed here
+
 func (c EpicClient) GetClientCredentialsEOS(clientId string, clientSecret string) (ClientCredentialsResponse, error) {
 	encodedClientToken := base64Encode(clientId + ":" + clientSecret)
 
@@ -164,6 +166,102 @@ func (c EpicClient) RefreshTokenLogin(clientId string, clientSecret string, refr
 	v := url.Values{}
 	v.Set("grant_type", "refresh_token")
 	v.Set("refresh_token", refreshToken)
+	body := v.Encode()
+
+	resp, err := c.Request("POST", "https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", headers, body)
+	if err != nil {
+		return UserCredentialsResponse{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var res UserCredentialsResponse
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return UserCredentialsResponse{}, err
+	}
+
+	return res, nil
+}
+
+func (c EpicClient) GetClientCredentials(clientId string, clientSecret string) (ClientCredentialsResponse, error) {
+	encodedClientToken := base64Encode(clientId + ":" + clientSecret)
+
+	headers := http.Header{}
+	headers.Set("Content-Type", "application/x-www-form-urlencoded")
+	headers.Set("Authorization", fmt.Sprint("Basic ", encodedClientToken))
+
+	v := url.Values{}
+	v.Set("grant_type", "client_credentials")
+	body := v.Encode()
+
+	resp, err := c.Request("POST", "https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", headers, body)
+	if err != nil {
+		return ClientCredentialsResponse{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var res ClientCredentialsResponse
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return ClientCredentialsResponse{}, err
+	}
+
+	return res, nil
+}
+
+func (c EpicClient) GetExchangeCode(credentials UserCredentialsResponse) (ExchangeResponse, error) {
+	headers := http.Header{}
+	headers.Set("Authorization", fmt.Sprint("Bearer ", credentials.AccessToken))
+
+	resp, err := c.Request("GET", "https://account-public-service-prod.ol.epicgames.com/account/api/oauth/exchange", headers, "")
+	if err != nil {
+		return ExchangeResponse{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var res ExchangeResponse
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return ExchangeResponse{}, err
+	}
+
+	return res, nil
+}
+
+func (c EpicClient) GetDeviceAuth(credentials UserCredentialsResponse) (DeviceAuth, error) {
+	headers := http.Header{}
+	headers.Set("Authorization", fmt.Sprint("Bearer ", credentials.AccessToken))
+
+	resp, err := c.Request("POST", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s/deviceAuth", credentials.AccountId), headers, "")
+	if err != nil {
+		return DeviceAuth{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var res DeviceAuth
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return DeviceAuth{}, err
+	}
+
+	return res, nil
+}
+
+func (c EpicClient) ExchangeCodeLogin(clientId string, clientSecret string, exchangeCode string) (UserCredentialsResponse, error) {
+	encodedClientToken := base64Encode(clientId + ":" + clientSecret)
+
+	headers := http.Header{}
+	headers.Set("Content-Type", "application/x-www-form-urlencoded")
+	headers.Set("Authorization", fmt.Sprint("Basic ", encodedClientToken))
+
+	v := url.Values{}
+	v.Set("grant_type", "exchange_code")
+	v.Set("exchange_code", exchangeCode)
+	v.Set("scope", "offline_access")
 	body := v.Encode()
 
 	resp, err := c.Request("POST", "https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token", headers, body)

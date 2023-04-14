@@ -53,7 +53,7 @@ func main() {
 
 			user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
 			if err != nil {
-				panic(err)
+				// panic(err)
 			}
 
 			// check user logged in

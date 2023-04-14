@@ -14,6 +14,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// TODO: RESPOND TO THE INTERACTION SOMEHOW (MAYBE LOADING EMOJI OR SOMETHING), THEN UPDATE THE MESSAGE WITH THE RESPONSE TO PREVENT TIMEOUT
+
 var mcp = Command{
 	Create: discord.SlashCommandCreate{
 		Name:        "mcp",

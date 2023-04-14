@@ -1,10 +1,14 @@
 package commands
 
 import (
+	"blast/api/consts"
+	"blast/db"
 	"fmt"
+	"log"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var auth = Command{
@@ -22,7 +26,7 @@ var auth = Command{
 			},
 			discord.ApplicationCommandOptionSubCommand{
 				Name:        "device",
-				Description: "Generates device authorization.",
+				Description: "Generates device authorization using the fortniteIOSGameClient.",
 			},
 			discord.ApplicationCommandOptionSubCommand{
 				Name:        "exchange",
@@ -33,34 +37,57 @@ var auth = Command{
 	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
 		data := event.SlashCommandInteractionData()
 
-		// userId := event.User().ID.String()
+		userId := event.User().ID.String()
 
-		// user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
-		// if err != nil {
-		// 	return err
-		// }
+		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
+		if err != nil {
+			return err
+		}
 
-		// refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
-		// if err != nil {
-		// 	return err
-		// }
-
-		// log.Println(refreshCredentials)
+		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
+		if err != nil {
+			return err
+		}
 
 		switch *data.SubCommandName {
-		case "bearer":
-
+		case "bearer": // TODO: make ephermal
+			return fmt.Errorf(refreshCredentials.AccessToken)
 		case "client":
+			clientCredentials, err := blast.GetClientCredentials(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET)
+			if err != nil {
+				return err
+			}
 
-		case "device":
+			return fmt.Errorf(clientCredentials.AccessToken)
+		case "device": // TODO: make ephermal
+			exchange, err := blast.GetExchangeCode(refreshCredentials)
+			if err != nil {
+				return err
+			}
 
-		case "exchange":
+			exchangeCredentials, err := blast.ExchangeCodeLogin(consts.FORTNITE_IOS_CLIENT_ID, consts.FORTNITE_IOS_CLIENT_SECRET, exchange.Code)
+			if err != nil {
+				return err
+			}
 
+			deviceAuth, err := blast.GetDeviceAuth(exchangeCredentials)
+			if err != nil {
+				return err
+			}
+
+			log.Println(deviceAuth)
+
+			return fmt.Errorf("done")
+		case "exchange": // TODO: make ephermal
+			exchange, err := blast.GetExchangeCode(refreshCredentials)
+			if err != nil {
+				return err
+			}
+
+			return fmt.Errorf(exchange.Code)
 		default:
 			return fmt.Errorf("unknown subcommand")
 		}
-
-		return nil
 	},
 	LoginRequired: true,
 }

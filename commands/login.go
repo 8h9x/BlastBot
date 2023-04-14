@@ -101,13 +101,17 @@ var login = Command{
 					RefreshToken:     refreshPayload.Jti,
 					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
 					ClientId:         exchangeCredentials.ClientId,
-					AutoDailyClaim:   false,
+					Flags: db.AccountFlags{
+						AutoDailyClaim: false,
+					},
 				},
 			},
-			SelectedAccount:    0,
-			AutoDailyClaimBulk: false,
-			CreatedAt:          time.Now(),
-			UpdatedAt:          time.Now(),
+			SelectedAccount: 0,
+			BulkFlags: db.AccountFlags{
+				AutoDailyClaim: false,
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		if err == nil { // user exists
@@ -116,7 +120,9 @@ var login = Command{
 				"refreshToken":     refreshPayload.Jti,
 				"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
 				"clientId":         exchangeCredentials.ClientId,
-				"autoDailyClaim":   false,
+				"flags": bson.M{
+					"autoDailyClaim": false,
+				},
 			}}}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err

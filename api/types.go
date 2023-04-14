@@ -121,6 +121,92 @@ type MnemonicInfoResponse struct {
 	Version          int    `json:"version"`
 }
 
+type AccountInformation struct {
+	AgeGroup                   string    `json:"ageGroup"`
+	CabinedMode                bool      `json:"cabinedMode"`
+	CanUpdateDisplayName       bool      `json:"canUpdateDisplayName"`
+	CanUpdateDisplayNameNext   time.Time `json:"canUpdateDisplayNameNext"`
+	Country                    string    `json:"country"`
+	DisplayName                string    `json:"displayName"`
+	Email                      string    `json:"email"`
+	EmailVerified              bool      `json:"emailVerified"`
+	FailedLoginAttempts        int       `json:"failedLoginAttempts"`
+	HasHashedEmail             bool      `json:"hasHashedEmail"`
+	Headless                   bool      `json:"headless"`
+	Id                         string    `json:"id"`
+	LastDisplayNameChange      time.Time `json:"lastDisplayNameChange"`
+	LastLogin                  time.Time `json:"lastLogin"`
+	LastName                   string    `json:"lastName"`
+	MinorExpected              bool      `json:"minorExpected"`
+	MinorStatus                string    `json:"minorStatus"`
+	MinorVerified              bool      `json:"minorVerified"`
+	Name                       string    `json:"name"`
+	NumberOfDisplayNameChanges int       `json:"numberOfDisplayNameChanges"`
+	PreferredLanguage          string    `json:"preferredLanguage"`
+	TfaEnabled                 bool      `json:"tfaEnabled"`
+}
+
+type ExchangeResponse struct {
+	Code             string `json:"code"`
+	CreatingClientId string `json:"creatingClientId"`
+	ExpiresInSeconds int    `json:"expiresInSeconds"`
+}
+
+type DeviceAuth struct {
+	AccountId string `json:"accountId"`
+	Created   struct {
+		DateTime  time.Time `json:"dateTime"`
+		IpAddress string    `json:"ipAddress"`
+		Location  string    `json:"location"`
+	} `json:"created"`
+	DeviceId  string `json:"deviceId"`
+	Secret    string `json:"secret"`
+	UserAgent string `json:"userAgent"`
+}
+
+/*
+
+map[
+	accountId:3de654385bf64a9686614cdc999d2d21
+	created:map[
+		dateTime:2023-04-14T01:57:33.714Z
+		ipAddress:65.190.218.12
+		location:Bladenboro,United States
+	]
+	deviceId:b111059de97a465d93fee59fabad7c86
+	secret:WNAG5XCF756MMPGFDOWTYHU3J6E65YHZ
+	userAgent:FortniteGame/++Fortnite+Release-24.10-CL-24900093 Windows/10.0.22000.1.768.64bit
+]
+
+*/
+
+/*
+map[
+	ageGroup:UNKNOWN
+	cabinedMode:false
+	canUpdateDisplayName:false
+	canUpdateDisplayNameNext:2023-04-27T01:15:10.851Z
+	country:US
+	displayName:NarcissisticApe
+	email:tom.haze420@yahoo.com
+	emailVerified:true
+	failedLoginAttempts:0
+	hasHashedEmail:false
+	headless:false
+	id:3de654385bf64a9686614cdc999d2d21
+	lastDisplayNameChange:2023-04-13T01:15:10.851Z
+	lastLogin:2023-04-11T02:24:23.330Z
+	lastName:Burggess
+	minorExpected:false
+	minorStatus:NOT_MINOR
+	minorVerified:false
+	name:Sabrina
+	numberOfDisplayNameChanges:7
+	preferredLanguage:en
+	tfaEnabled:true
+]
+*/
+
 /*
 
 map[
