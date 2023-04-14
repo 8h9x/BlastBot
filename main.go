@@ -49,6 +49,8 @@ func main() {
 			log.Println("Blast is ready!")
 		}),
 		bot.WithEventListenerFunc(func(event *events.ApplicationCommandInteractionCreate) {
+			event.DeferCreateMessage(false)
+
 			data := event.SlashCommandInteractionData()
 
 			user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
@@ -58,7 +60,7 @@ func main() {
 
 			// check user logged in
 			if len(user.Accounts) == 0 && commands.RequiresLogin(data.CommandName()) {
-				event.CreateMessage(discord.NewMessageCreateBuilder().
+				event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
 					SetEmbeds(discord.NewEmbedBuilder().
 						SetDescription("You don't have any accounts saved!").
 						Build(),
@@ -71,14 +73,15 @@ func main() {
 
 			if handler, ok := commands.Handler(data.CommandName()); ok {
 				go func() {
-					err := handler(event)
+					err := handler(event, user)
 					if err != nil {
 						log.Println(err)
 
-						event.CreateMessage(discord.NewMessageCreateBuilder().
-							SetEmbeds(commands.FriendlyEmbed(discord.NewEmbedBuilder().
-								SetDescriptionf("```\nAn error occurred while executing the command: %s\n```", err.Error()),
-							).Build()).
+						event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
+							SetEmbeds(discord.NewEmbedBuilder().
+								SetDescriptionf("```\nAn error occurred while executing the command: %s\n```", err.Error()).
+								Build(),
+							).
 							Build(),
 						)
 					}

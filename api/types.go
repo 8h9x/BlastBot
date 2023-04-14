@@ -164,6 +164,12 @@ type DeviceAuth struct {
 	UserAgent string `json:"userAgent"`
 }
 
+type BRInfo struct {
+	Stash struct {
+		Globalcash int `json:"globalcash"`
+	} `json:"stash"`
+}
+
 /*
 
 map[

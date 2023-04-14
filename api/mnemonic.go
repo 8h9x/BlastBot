@@ -42,3 +42,20 @@ func (c EpicClient) FetchMnemonicInfo(credentials UserCredentialsResponse, mnemo
 
 	return res, nil
 }
+
+func (c EpicClient) RemoveFavoriteMnemonic(credentials UserCredentialsResponse, mnemonic string) error {
+	headers := http.Header{}
+	headers.Set("Content-Type", "application/json")
+	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
+
+	resp, err := c.Request("DELETE", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountId, mnemonic), headers, "{}")
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("invalid mnemonic")
+	}
+
+	return nil
+}

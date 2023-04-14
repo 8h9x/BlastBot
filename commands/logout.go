@@ -22,12 +22,7 @@ var logout = Command{
 			},
 		},
 	},
-	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
-		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
-		if err != nil {
-			return err
-		}
-
+	Handler: func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error {
 		if len(user.Accounts) == 0 {
 			return event.CreateMessage(discord.NewMessageCreateBuilder().
 				SetContent("You don't have any accounts saved!").
@@ -79,7 +74,7 @@ var logout = Command{
 
 		// return nil
 
-		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
 			// SetEmbeds(embed).
 			AddActionRow(
 				discord.NewStringSelectMenu("account", "Select an account to log out of").

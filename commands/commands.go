@@ -2,6 +2,7 @@ package commands
 
 import (
 	"blast/api"
+	"blast/db"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -9,7 +10,7 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-type CommandHandler func(event *events.ApplicationCommandInteractionCreate) error
+type CommandHandler func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error
 
 type Command struct {
 	Create        discord.SlashCommandCreate
@@ -32,6 +33,7 @@ func (c Command) register() {
 }
 
 func Setup() CommandList {
+	account.register()
 	auth.register()
 	login.register()
 	logout.register()

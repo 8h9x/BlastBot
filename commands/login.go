@@ -25,7 +25,7 @@ var login = Command{
 		Name:        "login",
 		Description: "Login to your Epic Games account.",
 	},
-	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
+	Handler: func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error {
 		clientCredentials, err := blast.GetClientCredentialsEOS(consts.UEFN_CLIENT_ID, consts.UEFN_CLIENT_SECRET)
 		if err != nil {
 			return err
@@ -42,11 +42,11 @@ var login = Command{
 			// SetAuthorIcon(event.). // TODO set author icon to bot user avatar
 			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).
-			SetTitle("Add a new account <a:blastrocket:1094632950395588608>").
+			SetTitle("Add a new account <a:rocket:1094632950395588608>").
 			SetDescriptionf("**Login Instructions:**\n**1.** Click the `Login` button below.\n**2.** Click the `Confirm` button on the epic games page.\n**3.** Wait a few seconds for the bot to process login.\n\n***This interaction will timeout <t:%d:R>.***", expires).
 			Build()
 
-		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
 			SetEmbeds(embed).
 			AddActionRow(
 				discord.NewLinkButton("Login", deviceAuthorization.VerificationUriComplete),
@@ -92,7 +92,7 @@ var login = Command{
 
 		col := db.GetCollection("users")
 
-		user := db.UserEntry{
+		userEntry := db.UserEntry{
 			ID:        primitive.NewObjectID().Hex(),
 			DiscordID: userId,
 			Accounts: []db.EpicAccountEntry{
@@ -128,7 +128,7 @@ var login = Command{
 				return err
 			}
 		} else {
-			_, err = col.InsertOne(context.Background(), user)
+			_, err = col.InsertOne(context.Background(), userEntry)
 			if err != nil {
 				return err
 			}

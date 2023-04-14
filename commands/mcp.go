@@ -5,13 +5,11 @@ import (
 	"blast/db"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // TODO: RESPOND TO THE INTERACTION SOMEHOW (MAYBE LOADING EMOJI OR SOMETHING), THEN UPDATE THE MESSAGE WITH THE RESPONSE TO PREVENT TIMEOUT
@@ -53,13 +51,8 @@ var mcp = Command{
 			},
 		},
 	},
-	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
+	Handler: func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error {
 		data := event.SlashCommandInteractionData()
-
-		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
-		if err != nil {
-			return err
-		}
 
 		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
 		if err != nil {
@@ -82,9 +75,7 @@ var mcp = Command{
 			return err
 		}
 
-		log.Println(res)
-
-		err = event.CreateMessage(discord.NewMessageCreateBuilder().
+		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
 			AddFile(fmt.Sprintf("%s.%s.blast.json", strings.ToLower(operation), profileId), "Profile operation response.", res).
 			Build(),
 		)

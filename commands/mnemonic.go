@@ -8,7 +8,6 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var opts = []discord.ApplicationCommandOption{
@@ -24,10 +23,25 @@ var mnemonic = Command{
 		Name:        "mnemonic",
 		Description: "Mnemonic related commands.",
 		Options: []discord.ApplicationCommandOption{
-			discord.ApplicationCommandOptionSubCommand{
-				Name:        "favorite",
-				Description: "Adds a mnemonic to your favorites.",
-				Options:     opts,
+			discord.ApplicationCommandOptionSubCommandGroup{
+				Name:        "favorites",
+				Description: "Mnemonic favorites related commands.",
+				Options: []discord.ApplicationCommandOptionSubCommand{
+					{
+						Name:        "list",
+						Description: "Returns your discovery favorites list.",
+					},
+					{
+						Name:        "add",
+						Description: "Adds a mnemonic to your favorites list.",
+						Options:     opts,
+					},
+					{
+						Name:        "remove",
+						Description: "Removes a mnemonic from your favorites list.",
+						Options:     opts,
+					},
+				},
 			},
 			discord.ApplicationCommandOptionSubCommand{
 				Name:        "info",
@@ -36,15 +50,8 @@ var mnemonic = Command{
 			},
 		},
 	},
-	Handler: func(event *events.ApplicationCommandInteractionCreate) error {
+	Handler: func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error {
 		data := event.SlashCommandInteractionData()
-
-		userId := event.User().ID.String()
-
-		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
-		if err != nil {
-			return err
-		}
 
 		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
 		if err != nil {
@@ -53,14 +60,36 @@ var mnemonic = Command{
 
 		log.Println(refreshCredentials)
 
-		switch *data.SubCommandName {
-		case "favorite":
-			err := blast.AddFavoriteMnemonic(refreshCredentials, data.String("mnemonic"))
-			if err != nil {
-				return err
-			}
+		subCommandName := *data.SubCommandName
+		topLevelSubCommandName := subCommandName
 
-			return fmt.Errorf("added favorite")
+		groupNamePointer := data.SubCommandGroupName
+		if groupNamePointer != nil {
+			topLevelSubCommandName = *data.SubCommandGroupName
+		}
+
+		switch topLevelSubCommandName {
+		case "favorites":
+			switch subCommandName {
+			case "list":
+				return fmt.Errorf("unknown subcommand")
+			case "add":
+				err := blast.AddFavoriteMnemonic(refreshCredentials, data.String("mnemonic"))
+				if err != nil {
+					return err
+				}
+
+				return fmt.Errorf("added favorite")
+			case "remove":
+				err := blast.RemoveFavoriteMnemonic(refreshCredentials, data.String("mnemonic"))
+				if err != nil {
+					return err
+				}
+
+				return fmt.Errorf("removed favorite")
+			default:
+				return fmt.Errorf("unknown subcommand")
+			}
 		case "info":
 			res, err := blast.FetchMnemonicInfo(refreshCredentials, data.String("mnemonic"))
 			if err != nil {
