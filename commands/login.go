@@ -12,20 +12,19 @@ import (
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/handler"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MAX SAVED ACCOUNTS IS 10
+var login = discord.SlashCommandCreate{
+	Name:        "login",
+	Description: "Login to your Epic Games account.",
+}
 
-var login = Command{
-	Create: discord.SlashCommandCreate{
-		Name:        "login",
-		Description: "Login to your Epic Games account.",
-	},
-	Handler: func(event *events.ApplicationCommandInteractionCreate, user db.UserEntry) error {
+var Login = Command{
+	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
 		clientCredentials, err := blast.GetClientCredentialsEOS(consts.UEFN_CLIENT_ID, consts.UEFN_CLIENT_SECRET)
 		if err != nil {
 			return err
@@ -46,7 +45,7 @@ var login = Command{
 			SetDescriptionf("**Login Instructions:**\n**1.** Click the `Login` button below.\n**2.** Click the `Confirm` button on the epic games page.\n**3.** Wait a few seconds for the bot to process login.\n\n***This interaction will timeout <t:%d:R>.***", expires).
 			Build()
 
-		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().
+		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 			SetEmbeds(embed).
 			AddActionRow(
 				discord.NewLinkButton("Login", deviceAuthorization.VerificationUriComplete),
@@ -134,29 +133,17 @@ var login = Command{
 			}
 		}
 
-		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContentf("Logged in as `%s`!", deviceCodeCredentials.AccountId).Build())
+		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().SetContentf("Logged in as `%s`!", deviceCodeCredentials.AccountId).Build())
 		if err != nil {
 			return err
 		}
 
 		return nil
 	},
-	LoginRequired: false,
+	LoginRequired:     false,
+	EphemeralResponse: false,
 }
 
 func base64Decode(s string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(s)
 }
-
-// func respondLoginCanceled(event *events.ApplicationCommandInteractionCreate) error {
-// 	_, err := event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetContent("Login canceled!").Build())
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func getAv(user discord.User, format discord.ImageFormat) string {
-// 	return *user.AvatarURL(discord.WithFormat(format), discord.WithSize(1024))
-// }

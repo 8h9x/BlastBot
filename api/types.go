@@ -170,6 +170,62 @@ type BRInfo struct {
 	} `json:"stash"`
 }
 
+type APIVersionResponse struct {
+	App                       string    `json:"app"`
+	ServerDate                time.Time `json:"serverDate"`
+	OverridePropertiesVersion string    `json:"overridePropertiesVersion"`
+	CLN                       string    `json:"cln"`
+	Build                     string    `json:"build"`
+	ModuleName                string    `json:"moduleName"`
+	BuildDate                 time.Time `json:"buildDate"`
+	Version                   string    `json:"version"`
+	Branch                    string    `json:"branch"`
+	Modules                   map[string]struct {
+		CLN       string    `json:"cln"`
+		Build     string    `json:"build"`
+		BuildDate time.Time `json:"buildDate"`
+		Version   string    `json:"version"`
+		Branch    string    `json:"branch"`
+	} `json:"modules"`
+}
+
+/*
+{
+  "app": "fortnite",
+  "serverDate": "2023-04-15T00:49:58.443Z",
+  "overridePropertiesVersion": "unknown",
+  "cln": "25029190",
+  "build": "255",
+  "moduleName": "Fortnite-Core",
+  "buildDate": "2023-04-13T18:00:01.364Z",
+  "version": "24.20",
+  "branch": "Release-24.20",
+  "modules": {
+    "Epic-LightSwitch-AccessControlCore": {
+      "cln": "24565549",
+      "build": "b2144",
+      "buildDate": "2023-03-08T20:12:52.378Z",
+      "version": "1.0.0",
+      "branch": "trunk"
+    },
+    "epic-xmpp-api-v1-base": {
+      "cln": "5131a23c1470acbd9c94fae695ef7d899c1a41d6",
+      "build": "b3595",
+      "buildDate": "2019-07-30T09:11:06.587Z",
+      "version": "0.0.1",
+      "branch": "master"
+    },
+    "epic-common-core": {
+      "cln": "b3121b2c45b97e4ac06c789b052dc39f00a992fb",
+      "build": "b1202",
+      "buildDate": "2023-03-13T17:20:46.525Z",
+      "version": "5.0.0.20230313171954",
+      "branch": "master"
+    }
+  }
+}
+*/
+
 /*
 
 map[

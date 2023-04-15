@@ -1,6 +1,7 @@
 package api
 
 import (
+	"blast/api/consts"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,7 +24,7 @@ type RequestError struct {
 	Raw        EpicErrorResponse
 }
 
-func (e *RequestError) Error() string {
+func (e RequestError) Error() string {
 	return e.Message
 }
 
@@ -33,7 +34,7 @@ func (c EpicClient) Request(method string, url string, headers http.Header, body
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", "FortniteGame/++Fortnite+Release-24.10-CL-24900093 Windows/10.0.22000.1.768.64bit")
+	req.Header.Set("User-Agent", "FortniteGame/++Fortnite+Release-24.20-CL-25029190 Windows/10.0.22000.1.768.64bit")
 
 	for key, value := range headers {
 		req.Header.Set(key, value[0])
@@ -67,4 +68,21 @@ func (c EpicClient) Request(method string, url string, headers http.Header, body
 	}
 
 	return resp, nil
+}
+
+func (c EpicClient) FetchAPIVersion() (APIVersionResponse, error) {
+	resp, err := c.Request("GET", fmt.Sprintf("%s/version", consts.FORTNITE_API_BASE), nil, "")
+	if err != nil {
+		return APIVersionResponse{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var res APIVersionResponse
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return APIVersionResponse{}, err
+	}
+
+	return res, nil
 }
