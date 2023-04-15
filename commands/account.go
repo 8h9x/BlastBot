@@ -69,7 +69,7 @@ var AccountInfo = Command{
 			SetAuthorIconf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(locker.Attributes.LockerSlotsData.Slots["Character"].Items[0], "AthenaCharacter:", "", -1)). // TODO set author icon to bot user avatar
 			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).
-			SetAuthorNamef("%s | %s", account.DisplayName, credentials.AccountId).
+			SetAuthorNamef("%s | %s", account.DisplayName, credentials.AccountID).
 			AddField("<:llama:1096476378121126000> Account Level", fmt.Sprint(attributes.AccountLevel), true).
 			AddField(fmt.Sprintf("%s Battlepass Level", bpEmoji), fmt.Sprint(attributes.Level), true).
 			AddField("<:battle_star:1096473613504368640> Battlestars", fmt.Sprint(attributes.Battlestars), true).

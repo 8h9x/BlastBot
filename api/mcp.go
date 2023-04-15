@@ -15,7 +15,7 @@ func (c EpicClient) ProfileOperationStr(credentials UserCredentialsResponse, ope
 
 	// https://fngw-mcp-gc-livefn.ol.epicgames.com/fortnite/api/game/v2/profile/:accountId/:route/:operation
 
-	resp, err := c.Request("POST", fmt.Sprintf("%s/profile/%s/client/%s?profileId=%s&rvn=-1", consts.FORTNITE_GAME_BASE, credentials.AccountId, operation, profileId), headers, body)
+	resp, err := c.Request("POST", fmt.Sprintf("%s/profile/%s/client/%s?profileId=%s&rvn=-1", consts.FORTNITE_GAME_BASE, credentials.AccountID, operation, profileId), headers, body)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ type AthenaProfileStats struct {
 // 	headers.Set("Content-Type", "application/json")
 // 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-// 	resp, err := c.Request("POST", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountId, mnemonic), headers, "{}")
+// 	resp, err := c.Request("POST", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountID, mnemonic), headers, "{}")
 // 	if err != nil {
 // 		return err
 // 	}

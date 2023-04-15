@@ -11,7 +11,7 @@ func (c EpicClient) AddFavoriteMnemonic(credentials UserCredentialsResponse, mne
 	headers.Set("Content-Type", "application/json")
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("POST", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountId, mnemonic), headers, "{}")
+	resp, err := c.Request("POST", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountID, mnemonic), headers, "{}")
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (c EpicClient) RemoveFavoriteMnemonic(credentials UserCredentialsResponse, 
 	headers.Set("Content-Type", "application/json")
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("DELETE", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountId, mnemonic), headers, "{}")
+	resp, err := c.Request("DELETE", fmt.Sprintf("https://fn-service-discovery-live-public.ogs.live.on.epicgames.com/api/v1/links/favorites/%s/%s", credentials.AccountID, mnemonic), headers, "{}")
 	if err != nil {
 		return err
 	}

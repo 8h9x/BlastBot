@@ -72,7 +72,16 @@ var auth = discord.SlashCommandCreate{
 
 var AuthBearer = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		return fmt.Errorf(credentials.AccessToken)
+		_, err := event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+			SetEmbeds(discord.NewEmbedBuilder().
+				SetColor(0xFB5A32).
+				SetTimestamp(time.Now()).
+				SetTitle("Here's your `fortnitePCGameClient` bearer token:").
+				SetDescriptionf("```yml\n%s\n```", credentials.AccessToken).
+				Build(),
+			).Build(),
+		)
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: true,
@@ -93,11 +102,7 @@ var AuthClient = Command{
 		}
 
 		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().SetContentf("```json\n%s\n```", clientCredentialsJSONStr).Build())
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	},
 	LoginRequired:     false,
 	EphemeralResponse: false,
@@ -126,11 +131,7 @@ var AuthDevice = Command{
 		}
 
 		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().SetContentf("```json\n%s\n```", deviceAuthJSONStr).Build())
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: true,
@@ -148,14 +149,11 @@ var AuthExchange = Command{
 				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).
 				SetTitle("Here's your exchange code:").
-				SetDescriptionf("```hs\n%s\n```", exchange.Code).
+				SetDescriptionf("```yml\n%s\n```", exchange.Code).
 				Build(),
 			).Build(),
 		)
-		if err != nil {
-			return err
-		}
-		return nil
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: true,

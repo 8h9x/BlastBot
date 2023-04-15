@@ -24,6 +24,7 @@ import (
 	"blast/api"
 	"blast/api/consts"
 	"blast/commands"
+	"blast/components"
 	"blast/db"
 )
 
@@ -56,6 +57,9 @@ func main() {
 	h.Command("/mnemonic/favorites/list", CommandHandlerWrapper(commands.MnemonicFavoritesList))
 	h.Command("/mnemonic/favorites/remove", CommandHandlerWrapper(commands.MnemonicFavoritesRemove))
 	h.Command("/mnemonic/info", CommandHandlerWrapper(commands.MnemonicInfo))
+
+	h.Component("cancel", components.Cancel)
+	h.Component("logout_account_select", components.LogoutAccountSelect)
 
 	client, err := disgo.New(os.Getenv("DISCORD_TOKEN"),
 		bot.WithLogger(logger),
@@ -107,7 +111,7 @@ func CommandHandlerWrapper(c commands.Command) handler.CommandHandler {
 
 		user, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": event.User().ID.String()})
 		if err != nil {
-			event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().SetContent("Database query error!").Build())
+			// event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().SetContent("Database query error!").Build())
 		}
 
 		blast := api.New()
@@ -123,11 +127,11 @@ func CommandHandlerWrapper(c commands.Command) handler.CommandHandler {
 			}
 		}
 
-		err = c.Handler(event, *blast, user, credentials, event.SlashCommandInteractionData())
-
-		if err != nil {
-			CommandHandlerErrorRespond(event, err)
-		}
+		go func() {
+			if err := c.Handler(event, *blast, user, credentials, event.SlashCommandInteractionData()); err != nil {
+				CommandHandlerErrorRespond(event, err)
+			}
+		}()
 
 		return nil
 	}
@@ -136,7 +140,10 @@ func CommandHandlerWrapper(c commands.Command) handler.CommandHandler {
 func CommandHandlerErrorRespond(event *handler.CommandEvent, err error) {
 	event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 		SetEmbeds(discord.NewEmbedBuilder().
-			SetDescriptionf("```\nAn error occurred while executing the command: %s\n```", err.Error()).
+			SetColor(0xFB5A32).
+			SetTimestamp(time.Now()).
+			SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+			SetDescriptionf("```\n%s\n```", err.Error()).
 			Build(),
 		).
 		Build(),

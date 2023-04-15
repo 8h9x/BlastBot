@@ -96,7 +96,7 @@ func (c EpicClient) WaitForDeviceCodeAcceptEOS(clientId string, clientSecret str
 
 	if err != nil {
 		if err.(*RequestError).Raw.ErrorCode == "errors.com.epicgames.account.oauth.authorization_pending" {
-			time.Sleep(3 * time.Second)
+			time.Sleep(10 * time.Second)
 			return c.WaitForDeviceCodeAcceptEOS(clientId, clientSecret, deviceCode)
 		}
 
@@ -235,7 +235,7 @@ func (c EpicClient) GetDeviceAuth(credentials UserCredentialsResponse) (DeviceAu
 	headers := http.Header{}
 	headers.Set("Authorization", fmt.Sprint("Bearer ", credentials.AccessToken))
 
-	resp, err := c.Request("POST", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s/deviceAuth", credentials.AccountId), headers, "")
+	resp, err := c.Request("POST", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s/deviceAuth", credentials.AccountID), headers, "")
 	if err != nil {
 		return DeviceAuth{}, err
 	}

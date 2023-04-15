@@ -11,7 +11,7 @@ func (c EpicClient) FetchAccountInformation(credentials UserCredentialsResponse)
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("GET", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s", credentials.AccountId), headers, "")
+	resp, err := c.Request("GET", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s", credentials.AccountID), headers, "")
 	if err != nil {
 		return AccountInformation{}, err
 	}
@@ -31,7 +31,7 @@ func (c EpicClient) FetchAccountBRInfo(credentials UserCredentialsResponse) (BRI
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("GET", fmt.Sprintf("%s/br-inventory/account/%s", consts.FORTNITE_GAME_BASE, credentials.AccountId), headers, "")
+	resp, err := c.Request("GET", fmt.Sprintf("%s/br-inventory/account/%s", consts.FORTNITE_GAME_BASE, credentials.AccountID), headers, "")
 	if err != nil {
 		return BRInfo{}, err
 	}
@@ -51,7 +51,7 @@ func (c EpicClient) FetchPartyInfo(credentials UserCredentialsResponse) (any, er
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("GET", fmt.Sprintf("https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/%s", credentials.AccountId), headers, "")
+	resp, err := c.Request("GET", fmt.Sprintf("https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/%s", credentials.AccountID), headers, "")
 	if err != nil {
 		return BRInfo{}, err
 	}

@@ -32,7 +32,7 @@ type DeviceAuthorizationResponse struct {
 
 type UserCredentialsResponseEOS struct {
 	AccessToken      string    `json:"access_token"`
-	AccountId        string    `json:"account_id"`
+	AccountID        string    `json:"account_id"`
 	ApplicationId    string    `json:"application_id"`
 	ClientId         string    `json:"client_id"`
 	ExpiresAt        time.Time `json:"expires_at"`
@@ -46,7 +46,7 @@ type UserCredentialsResponseEOS struct {
 
 type UserCredentialsResponse struct {
 	AccessToken      string    `json:"access_token"`
-	AccountId        string    `json:"account_id"`
+	AccountID        string    `json:"account_id"`
 	ApplicationId    string    `json:"application_id"`
 	ClientId         string    `json:"client_id"`
 	ExpiresAt        time.Time `json:"expires_at"`
@@ -153,7 +153,7 @@ type ExchangeResponse struct {
 }
 
 type DeviceAuth struct {
-	AccountId string `json:"accountId"`
+	AccountID string `json:"accountId"`
 	Created   struct {
 		DateTime  time.Time `json:"dateTime"`
 		IpAddress string    `json:"ipAddress"`
