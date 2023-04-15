@@ -5,6 +5,7 @@ import (
 	"blast/db"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -65,6 +66,96 @@ var AccountInfo = Command{
 			}
 		}
 
+		/* PATCH https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/parties/{PartyID}/members/{Account_ID}/meta
+		   {
+		   	"delete": [],
+		   	"revision": 4,
+		   	"update": {
+		   		"Default:AthenaCosmeticLoadout_j": "{
+		   			'AthenaCosmeticLoadout': {
+		   				'characterDef': '/Game/Athena/Items/Cosmetics/Characters/CID_342_Athena_Commando_M_StreetRacerMetallic.CID_342_Athena_Commando_M_StreetRacerMetallic',
+		   				'characterEKey': '',
+		   				'backpackDef': '/Game/Athena/Items/Cosmetics/Backpacks/BID_610_ElasticHologram.BID_610_ElasticHologram',
+		   				'backpackEKey': '',
+		   				'pickaxeDef': '/Game/Athena/Items/Cosmetics/Pickaxes/Pickaxe_ID_035_Prismatic.Pickaxe_ID_035_Prismatic',
+		   				'pickaxeEKey': '',
+		   				'contrailDef': '/Game/Athena/Items/Cosmetics/Contrails/Trails_ID_019_PSBurnout.Trails_ID_019_PSBurnout',
+		   				'contrailEKey': '',
+		   				'scratchpad': [],
+		   				'cosmeticStats': [
+		   					{
+		   						'statName': 'TotalVictoryCrowns',
+		   						'statValue': 999
+		   					},
+		   					{
+		   						'statName': 'TotalRoyalRoyales',
+		   						'statValue': 999
+		   					},
+		   					{
+		   						'statName':
+		   						'HasCrown',
+		   						'statValue': 1
+		   					}
+		   				]
+		   			}
+		   		}"
+		   	}
+		   }
+		*/
+
+		// partyMetaUpdate := api.PartyMetaUpdate{
+		// 	Delete:   []string{},
+		// 	Revision: 4,
+		// 	Update: api.PartyMetaUpdateData{
+		// 		DefaultAthenaCosmeticLoadoutJ: api.PartyMetaUpdateDefaultAthenaCosmeticLoadoutJ{
+		// 			AthenaCosmeticLoadout: api.PartyMetaUpdateDefaultAthenaCosmeticLoadout{
+		// 				CharacterDef:  "/Game/Athena/Items/Cosmetics/Characters/CID_342_Athena_Commando_M_StreetRacerMetallic.CID_342_Athena_Commando_M_StreetRacerMetallic",
+		// 				CharacterEKey: "",
+		// 				BackpackDef:   "/Game/Athena/Items/Cosmetics/Backpacks/BID_610_ElasticHologram.BID_610_ElasticHologram",
+		// 				BackpackEKey:  "",
+		// 				PickaxeDef:    "/Game/Athena/Items/Cosmetics/Pickaxes/Pickaxe_ID_035_Prismatic.Pickaxe_ID_035_Prismatic",
+		// 				PickaxeEKey:   "",
+		// 				ContrailDef:   "/Game/Athena/Items/Cosmetics/Contrails/Trails_ID_019_PSBurnout.Trails_ID_019_PSBurnout",
+		// 				ContrailEKey:  "",
+		// 				Scratchpad:    []string{},
+		// 				CosmeticStats: []api.PartyMetaUpdateAthenaCosmeticStat{
+		// 					{
+		// 						StatName:  "TotalVictoryCrowns",
+		// 						StatValue: 999,
+		// 					},
+		// 					{
+		// 						StatName:  "TotalRoyalRoyales",
+		// 						StatValue: 999,
+		// 					},
+		// 					{
+		// 						StatName:  "HasCrown",
+		// 						StatValue: 1,
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// }
+
+		// json, err := json.Marshal(partyMetaUpdate)
+		// if err != nil {
+		// 	return err
+		// }
+
+		updateData := `{"overridden":{},"deleted":[],"revision":4,"updated":{"Default:AthenaCosmeticLoadout_j":{"AthenaCosmeticLoadout":{"characterDef":"/Game/Athena/Items/Cosmetics/Characters/CID_342_Athena_Commando_M_StreetRacerMetallic.CID_342_Athena_Commando_M_StreetRacerMetallic","characterEKey":"","backpackDef":"/Game/Athena/Items/Cosmetics/Backpacks/BID_610_ElasticHologram.BID_610_ElasticHologram","backpackEKey":"","pickaxeDef":"/Game/Athena/Items/Cosmetics/Pickaxes/Pickaxe_ID_035_Prismatic.Pickaxe_ID_035_Prismatic","pickaxeEKey":"","contrailDef":"/Game/Athena/Items/Cosmetics/Contrails/Trails_ID_019_PSBurnout.Trails_ID_019_PSBurnout","contrailEKey":"","scratchpad":[],"cosmeticStats":[{"statName":"TotalVictoryCrowns","statValue":999},{"statName":"TotalRoyalRoyales","statValue":999},{"statName":"HasCrown","statValue":1}]}}}}`
+
+		party, err := blast.FetchParty(credentials)
+		if err != nil {
+			return err
+		}
+
+		res, err := blast.PartyMetaUpdate(credentials, party.Current[0].ID, updateData)
+		if err != nil {
+			return err
+		}
+
+		log.Println(res)
+
 		embed := discord.NewEmbedBuilder().
 			SetAuthorIconf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(locker.Attributes.LockerSlotsData.Slots["Character"].Items[0], "AthenaCharacter:", "", -1)). // TODO set author icon to bot user avatar
 			SetColor(0xFB5A32).
@@ -83,11 +174,7 @@ var AccountInfo = Command{
 			Build()
 
 		_, err = event.Client().Rest().UpdateInteractionResponse(event.ApplicationID(), event.Token(), discord.NewMessageUpdateBuilder().SetEmbeds(embed).Build())
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: false,
