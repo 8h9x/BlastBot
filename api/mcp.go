@@ -269,3 +269,124 @@ type AthenaProfileStats struct {
 
 //     return { body, statusCode };
 // };
+
+type CampaignProfile struct {
+	ProfileRevision            int    `json:"profileRevision"`
+	ProfileID                  string `json:"profileId"`
+	ProfileChangesBaseRevision int    `json:"profileChangesBaseRevision"`
+	ProfileChanges             []struct {
+		ChangeType string              `json:"changeType"`
+		Profile    CampaignProfileData `json:"profile"`
+	} `json:"profileChanges"`
+	ProfileCommandRevision int    `json:"profileCommandRevision"`
+	ServerTime             string `json:"serverTime"`
+	ResponseVersion        int    `json:"responseVersion"`
+	Notifications          []struct {
+		Type         string `json:"type"`
+		Primary      bool   `json:"primary"`
+		DaysLoggedIn int    `json:"daysLoggedIn"`
+		Items        []struct {
+			ItemType    string `json:"itemType"`
+			ItemGuid    string `json:"itemGuid"`
+			ItemProfile string `json:"itemProfile"`
+			Quantity    int    `json:"quantity"`
+		} `json:"items"`
+	} `json:"notifications"`
+}
+
+type CampaignProfileData struct {
+	Created         string                               `json:"created"`
+	Updated         string                               `json:"updated"`
+	Rvn             int                                  `json:"rvn"`
+	WipeNumber      int                                  `json:"wipeNumber"`
+	AccountID       string                               `json:"accountId"`
+	ProfileID       string                               `json:"profileId"`
+	Version         string                               `json:"version"`
+	CommandRevision int                                  `json:"commandRevision"`
+	Items           map[string]*CampaignProfileItemEntry `json:"items"`
+	Stats           CampaignProfileStats                 `json:"stats"`
+}
+
+type CampaignProfileItemEntry struct {
+	TemplateID string      `json:"templateId"`
+	Quantity   int         `json:"quantity"`
+	Attributes interface{} `json:"attributes"`
+}
+
+type CampaignProfileStats struct {
+	Attributes struct {
+		NodeCosts struct {
+			HomebaseNodeDefaultPage struct {
+				TokenHomebasepoints int `json:"Token:homebasepoints"`
+			} `json:"homebase_node_default_page"`
+			ResearchNodeDefaultPage map[string]int `json:"research_node_default_page"`
+		} `json:"node_costs"`
+		MissionAlertRedemptionRecord struct {
+			ClaimData []struct {
+				MissionAlertID         string `json:"missionAlertId"`
+				RedemptionDateUtc      string `json:"redemptionDateUtc"`
+				EvictClaimDataAfterUtc string `json:"evictClaimDataAfterUtc"`
+			} `json:"claimData"`
+		} `json:"mission_alert_redemption_record"`
+		ClientSettings struct {
+			PinnedQuestInstances []interface{} `json:"pinnedQuestInstances"`
+		} `json:"client_settings"`
+		ResearchLevels struct {
+			Fortitude  int `json:"fortitude"`
+			Offense    int `json:"offense"`
+			Resistance int `json:"resistance"`
+			Technology int `json:"technology"`
+		} `json:"research_levels"`
+		Level               int           `json:"level"`
+		SelectedHeroLoadout string        `json:"selected_hero_loadout"`
+		Loadouts            []interface{} `json:"loadouts"`
+		CollectionBook      struct {
+			MaxBookXpLevelAchieved int `json:"maxBookXpLevelAchieved"`
+		} `json:"collection_book"`
+		LatentXPMarker   string `json:"latent_xp_marker"`
+		MfaRewardClaimed bool   `json:"mfa_reward_claimed"`
+		QuestManager     struct {
+			DailyLoginInterval string `json:"dailyLoginInterval"`
+			DailyQuestRerolls  int    `json:"dailyQuestRerolls"`
+			QuestPoolStats     struct {
+				PoolStats []struct {
+					PoolName         string   `json:"poolName"`
+					NextRefresh      string   `json:"nextRefresh"`
+					RerollsRemaining int      `json:"rerollsRemaining"`
+					QuestHistory     []string `json:"questHistory"`
+				} `json:"poolStats"`
+				DailyLoginInterval string `json:"dailyLoginInterval"`
+				PoolLockouts       struct {
+					PoolLockouts []struct {
+						LockoutName string `json:"lockoutName"`
+					} `json:"poolLockouts"`
+				} `json:"poolLockouts"`
+			} `json:"questPoolStats"`
+		} `json:"quest_manager"`
+		LegacyResearchPointsSpent int `json:"legacy_research_points_spent"`
+		GameplayStats             []struct {
+			StatName  string `json:"statName"`
+			StatValue int    `json:"statValue"`
+		} `json:"gameplay_stats"`
+		EventCurrency struct {
+			TemplateID string  `json:"templateId"`
+			CF         float64 `json:"cf"`
+		} `json:"event_currency"`
+		MatchesPlayed int           `json:"matches_played"`
+		ModeLoadouts  []interface{} `json:"mode_loadouts"`
+		DailyRewards  struct {
+			NextDefaultReward   int    `json:"nextDefaultReward"`
+			TotalDaysLoggedIn   int    `json:"totalDaysLoggedIn"`
+			LastClaimDate       string `json:"lastClaimDate"`
+			AdditionalSchedules struct {
+				Founderspackdailyrewardtoken struct {
+					RewardsClaimed int  `json:"rewardsClaimed"`
+					ClaimedToday   bool `json:"claimedToday"`
+				} `json:"founderspackdailyrewardtoken"`
+			} `json:"additionalSchedules"`
+		} `json:"daily_rewards"`
+		LastAppliedLoadout string `json:"last_applied_loadout"`
+		XP                 int    `json:"xp"`
+		PacksGranted       int    `json:"packs_granted"`
+	} `json:"attributes"`
+}

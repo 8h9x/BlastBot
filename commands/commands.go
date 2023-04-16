@@ -11,6 +11,8 @@ import (
 var Commands = []discord.ApplicationCommandCreate{
 	account,
 	auth,
+	daily,
+	// ephemeral,
 	login,
 	logout,
 	mcp,

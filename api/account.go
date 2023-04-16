@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func (c EpicClient) FetchAccountInformation(credentials UserCredentialsResponse) (AccountInformation, error) {
@@ -47,24 +48,44 @@ func (c EpicClient) FetchAccountBRInfo(credentials UserCredentialsResponse) (BRI
 	return res, nil
 }
 
-func (c EpicClient) FetchPartyInfo(credentials UserCredentialsResponse) (any, error) {
+func (c EpicClient) FetchAvatars(credentials UserCredentialsResponse, accountIDs ...string) (FetchAvatarsResponse, error) {
+	if len(accountIDs) == 0 {
+		accountIDs = append(accountIDs, credentials.AccountID)
+	}
+
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
 
-	resp, err := c.Request("GET", fmt.Sprintf("https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/%s", credentials.AccountID), headers, "")
+	resp, err := c.Request("GET", fmt.Sprintf("https://avatar-service-prod.identity.live.on.epicgames.com/v1/avatar/fortnite/ids?accountIds=%s", strings.Join(accountIDs, ",")), headers, "")
 	if err != nil {
-		return BRInfo{}, err
+		return FetchAvatarsResponse{}, err
 	}
 
 	defer resp.Body.Close()
 
-	var res any
+	var res FetchAvatarsResponse
 	err = json.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
-		return BRInfo{}, err
+		return FetchAvatarsResponse{}, err
 	}
 
 	return res, nil
 }
 
-// https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/accountid
+func (c EpicClient) FetchAvatar(credentials UserCredentialsResponse) (AccountAvatar, error) {
+	avatars, err := c.FetchAvatars(credentials)
+	if err != nil {
+		return AccountAvatar{}, err
+	}
+
+	return avatars[0], nil
+}
+
+func (c EpicClient) FetchAvatarURL(credentials UserCredentialsResponse) (string, error) {
+	avatar, err := c.FetchAvatar(credentials)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatar.AvatarID, "ATHENACHARACTER:", "", -1)), nil
+}

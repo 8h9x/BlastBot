@@ -37,7 +37,7 @@ func LogoutAccountSelect(e *handler.ComponentEvent) error {
 			SetTimestamp(time.Now()).
 			SetAuthorIcon(*user.AvatarURL(discord.WithFormat(discord.ImageFormatPNG))).
 			SetAuthorNamef("Saved account removed from %s", user.Username).
-			SetDescriptionf("Successfully logged out of **%s**\nYou now have (%d/15) saved accounts.", displayName, len(userEntry.Accounts)).
+			SetDescriptionf("Successfully logged out of **%s**\nYou now have (%d/25) saved accounts.", displayName, len(userEntry.Accounts)).
 			Build()).
 		Build(),
 	)

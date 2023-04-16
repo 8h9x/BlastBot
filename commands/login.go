@@ -26,7 +26,7 @@ var login = discord.SlashCommandCreate{
 
 var Login = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		if len(user.Accounts) >= 15 {
+		if len(user.Accounts) >= 25 {
 			embed := discord.NewEmbedBuilder().
 				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).
@@ -147,9 +147,7 @@ var Login = Command{
 					RefreshToken:     refreshPayload.Jti,
 					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
 					ClientId:         exchangeCredentials.ClientId,
-					Flags: db.AccountFlags{
-						AutoDailyClaim: false,
-					},
+					Flags:            db.AUTODAILY,
 				},
 			},
 			SelectedAccount: 0,
@@ -166,10 +164,13 @@ var Login = Command{
 				"refreshToken":     refreshPayload.Jti,
 				"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
 				"clientId":         exchangeCredentials.ClientId,
-				"flags": bson.M{
-					"autoDailyClaim": false,
-				},
+				"flags":            db.AUTODAILY,
 			}}}, options.Update().SetUpsert(true))
+			if err != nil {
+				return err
+			}
+
+			_, err = col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$set": bson.M{"selectedAccount": len(user.Accounts)}})
 			if err != nil {
 				return err
 			}
@@ -190,15 +191,20 @@ var Login = Command{
 			return err
 		}
 
+		avatarURL, err := blast.FetchAvatarURL(refreshCredentials)
+		if err != nil {
+			return err
+		}
+
 		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 			ClearContent().
 			ClearContainerComponents().
 			SetEmbeds(discord.NewEmbedBuilder().
 				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).
-				SetAuthorIcon(*event.User().AvatarURL(discord.WithFormat(discord.ImageFormatPNG))).
+				SetAuthorIcon(avatarURL).
 				SetAuthorNamef("New account saved for %s", event.User().Username).
-				SetDescriptionf("Successfully logged into **%s**\nYou now have (%d/15) saved accounts.", accountInfo.DisplayName, len(user.Accounts)+1).
+				SetDescriptionf("Successfully logged into **%s**\nYou now have (%d/25) saved accounts.", accountInfo.DisplayName, len(user.Accounts)+1).
 				Build()).
 			Build(),
 		)

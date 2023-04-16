@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -46,10 +45,13 @@ func main() {
 	// h.Autocomplete("/test", commands.TestAutocompleteHandler)
 	// h.Component("test_button", components.TestComponent)
 	h.Command("/account/info", CommandHandlerWrapper(commands.AccountInfo))
+	h.Command("/account/switch", CommandHandlerWrapper(commands.AccountSwitch))
 	h.Command("/auth/bearer", CommandHandlerWrapper(commands.AuthBearer))
 	h.Command("/auth/client", CommandHandlerWrapper(commands.AuthClient))
 	h.Command("/auth/device", CommandHandlerWrapper(commands.AuthDevice))
 	h.Command("/auth/exchange", CommandHandlerWrapper(commands.AuthExchange))
+	h.Command("/daily", CommandHandlerWrapper(commands.Daily))
+	// h.Command("/ephemeral", CommandHandlerWrapper(commands.EphemeralCrowns))
 	h.Command("/login", CommandHandlerWrapper(commands.Login))
 	h.Command("/logout", CommandHandlerWrapper(commands.Logout))
 	h.Command("/mcp", CommandHandlerWrapper(commands.MCP))
@@ -58,7 +60,8 @@ func main() {
 	h.Command("/mnemonic/favorites/remove", CommandHandlerWrapper(commands.MnemonicFavoritesRemove))
 	h.Command("/mnemonic/info", CommandHandlerWrapper(commands.MnemonicInfo))
 
-	h.Component("cancel", components.Cancel)
+	h.Component("cancel", ComponentHandlerWrapper(components.Cancel))
+	h.Component("switch_account_select", components.SwitchAccountSelect)
 	h.Component("logout_account_select", components.LogoutAccountSelect)
 
 	client, err := disgo.New(os.Getenv("DISCORD_TOKEN"),
@@ -119,7 +122,19 @@ func CommandHandlerWrapper(c commands.Command) handler.CommandHandler {
 		credentials := api.UserCredentialsResponse{}
 
 		if len(user.Accounts) == 0 && c.LoginRequired {
-			CommandHandlerErrorRespond(event, fmt.Errorf("you don't have any accounts saved"))
+			embed := discord.NewEmbedBuilder().
+				SetColor(0xFB5A32).
+				SetTimestamp(time.Now()).
+				SetTitle("<:llama:1096476378121126000> Not the llama you're looking for!").
+				SetDescription("You do not have any saved accounts.\nAdd one using the `/login` command.").
+				Build()
+
+			_, err := event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+				SetEmbeds(embed).
+				ClearContent().
+				Build(),
+			)
+			return err
 		} else if c.LoginRequired {
 			credentials, err = blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
 			if err != nil {
@@ -148,6 +163,16 @@ func CommandHandlerErrorRespond(event *handler.CommandEvent, err error) {
 		).
 		Build(),
 	)
+}
+
+func ComponentHandlerWrapper(h handler.ComponentHandler) handler.ComponentHandler {
+	return func(event *handler.ComponentEvent) error {
+		if event.Message.Interaction.User.ID != event.User().ID {
+			return nil
+		}
+
+		return h(event)
+	}
 }
 
 // only load .env file if not prod

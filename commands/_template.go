@@ -26,6 +26,6 @@ var Template = Command{
 
 		return err
 	},
-	LoginRequired:     false,
+	LoginRequired:     true,
 	EphemeralResponse: false,
 }

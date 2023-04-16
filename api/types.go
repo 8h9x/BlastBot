@@ -189,6 +189,16 @@ type APIVersionResponse struct {
 	} `json:"modules"`
 }
 
+// [{"accountId":"3de654385bf64a9686614cdc999d2d21","namespace":"fortnite","avatarId":"ATHENACHARACTER:CID_083_ATHENA_COMMANDO_F_TACTICAL"}]
+
+type AccountAvatar struct {
+	AccountID string `json:"accountId"`
+	Namespace string `json:"namespace"`
+	AvatarID  string `json:"avatarId"`
+}
+
+type FetchAvatarsResponse []AccountAvatar
+
 /*
 {
   "app": "fortnite",
