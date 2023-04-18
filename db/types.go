@@ -1,6 +1,10 @@
 package db
 
-import "time"
+import (
+	"time"
+
+	"github.com/disgoorg/snowflake/v2"
+)
 
 type AccountFlags struct {
 	AutoDailyClaim bool `bson:"autoDailyClaim"`
@@ -16,10 +20,10 @@ type EpicAccountEntry struct {
 
 type UserEntry struct {
 	ID              string             `bson:"_id"`
-	DiscordID       string             `bson:"discordId"`
+	DiscordID       snowflake.ID       `bson:"discordId"`
 	Accounts        []EpicAccountEntry `bson:"accounts"`
 	SelectedAccount int                `bson:"selectedAccount"`
-	BulkFlags       AccountFlags
+	BulkFlags       UserFlag
 	CreatedAt       time.Time `bson:"createdAt"`
 	UpdatedAt       time.Time `bson:"updatedAt"`
 }
@@ -32,7 +36,8 @@ func (f *UserFlag) ClearFlag(flag UserFlag)   { *f &= ^flag }
 func (f *UserFlag) ToggleFlag(flag UserFlag)  { *f ^= flag }
 
 const (
-	DEVELOPER UserFlag = 1 << iota
+	USER UserFlag = 1 << iota
+	DEVELOPER
 	BETA
 	VIP
 	AUTODAILY

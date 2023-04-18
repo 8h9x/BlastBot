@@ -19,12 +19,12 @@ func LogoutAccountSelect(e *handler.ComponentEvent) error {
 
 	col := db.GetCollection("users")
 
-	_, err := col.UpdateOne(context.Background(), bson.M{"discordId": user.ID.String()}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": accountID}}})
+	_, err := col.UpdateOne(context.Background(), bson.M{"discordId": user.ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": accountID}}})
 	if err != nil {
 		return err
 	}
 
-	userEntry, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": user.ID.String()})
+	userEntry, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": user.ID})
 	if err != nil {
 		return err
 	}

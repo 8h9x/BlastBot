@@ -132,7 +132,7 @@ var Login = Command{
 			return err
 		}
 
-		userId := event.User().ID.String()
+		userId := event.User().ID
 
 		_, err = db.Fetch[db.UserEntry]("users", bson.M{"discordId": userId})
 
@@ -147,15 +147,13 @@ var Login = Command{
 					RefreshToken:     refreshPayload.Jti,
 					RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
 					ClientId:         exchangeCredentials.ClientId,
-					Flags:            db.AUTODAILY,
+					Flags:            db.USER,
 				},
 			},
 			SelectedAccount: 0,
-			BulkFlags: db.AccountFlags{
-				AutoDailyClaim: false,
-			},
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			BulkFlags:       db.USER,
+			CreatedAt:       time.Now(),
+			UpdatedAt:       time.Now(),
 		}
 
 		if err == nil { // user exists

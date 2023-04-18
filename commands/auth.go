@@ -74,7 +74,7 @@ var AuthBearer = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
 		_, err := event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 			SetEmbeds(discord.NewEmbedBuilder().
-				SetColor(0xFB5A32).
+				SetColor(0xCBA6F7).
 				SetTimestamp(time.Now()).
 				SetTitle("Here's your `fortnitePCGameClient` bearer token:").
 				SetDescriptionf("```yml\n%s\n```", credentials.AccessToken).
@@ -146,7 +146,7 @@ var AuthExchange = Command{
 
 		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 			SetEmbeds(discord.NewEmbedBuilder().
-				SetColor(0xFB5A32).
+				SetColor(0xCBA6F7).
 				SetTimestamp(time.Now()).
 				SetTitle("Here's your exchange code:").
 				SetDescriptionf("```yml\n%s\n```", exchange.Code).

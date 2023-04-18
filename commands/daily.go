@@ -2,7 +2,9 @@ package commands
 
 import (
 	"blast/api"
+	"blast/api/consts"
 	"blast/db"
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -10,17 +12,111 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	djson "github.com/disgoorg/json"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var daily = discord.SlashCommandCreate{
 	Name:        "daily",
 	Description: "Claims your Save the World daily login reward.",
+	Options: []discord.ApplicationCommandOption{
+		discord.ApplicationCommandOptionBool{
+			Name:        "bulk",
+			Description: "Claim available daily reward on all saved accounts.",
+		},
+	},
 }
 
 var Daily = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
+		if data.Bool("bulk") {
+			description := ""
+
+			for _, account := range user.Accounts {
+				refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
+				if err != nil {
+					if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
+						col := db.GetCollection("users")
+						_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": account.AccountID}}})
+						if err != nil {
+							return err
+						}
+
+						continue
+					}
+					return err
+				}
+
+				campaignProfile, err := blast.ProfileOperationStr(refreshCredentials, "ClaimLoginReward", "campaign", "{}")
+				if err != nil {
+					if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.fortnite.check_access_failed" {
+						continue
+					}
+					continue
+				}
+
+				defer campaignProfile.Close()
+
+				var profile api.CampaignProfile
+				err = json.NewDecoder(campaignProfile).Decode(&profile)
+				if err != nil {
+					return err
+				}
+
+				day := profile.ProfileChanges[0].Profile.Stats.Attributes.DailyRewards.TotalDaysLoggedIn
+				todaysReward := RewardGraph[day%336].Item
+
+				accountInfo, err := blast.FetchAccountInformation(refreshCredentials)
+				if err != nil {
+					return err
+				}
+
+				if len(profile.Notifications) > 0 {
+					if len(profile.Notifications[0].Items) == 0 {
+						description += fmt.Sprintf("<:checkbox:1097183591210946600> `%d` **%s:** ~~%s~~\n", day, accountInfo.DisplayName, todaysReward)
+					} else {
+						description += fmt.Sprintf("<:checkmark:1097182962937761904> `%d` **%s:** %s\n", day, accountInfo.DisplayName, todaysReward)
+					}
+				} else {
+					description += fmt.Sprintf("<:checkbox:1097183591210946600> `%d` **%s:** ~~%s~~\n", day, accountInfo.DisplayName, todaysReward)
+				}
+			}
+
+			_, err := event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+				SetEmbeds(discord.NewEmbedBuilder().
+					SetAuthorIcon(*event.User().AvatarURL(discord.WithFormat(discord.ImageFormatPNG))).
+					SetColor(0xFB5A32).
+					SetTimestamp(time.Now()).
+					SetAuthorNamef(event.User().Username).
+					SetTitle("Daily Rewards").
+					SetDescription(description).
+					Build(),
+				).
+				Build(),
+			)
+			return err
+		}
+
+		account, err := blast.FetchAccountInformation(credentials)
+		if err != nil {
+			return err
+		}
+
 		campaignProfile, err := blast.ProfileOperationStr(credentials, "ClaimLoginReward", "campaign", "{}")
 		if err != nil {
+			if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.fortnite.check_access_failed" {
+				_, err := event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+					SetEmbeds(discord.NewEmbedBuilder().
+						SetColor(0xFB5A32).
+						SetTimestamp(time.Now()).
+						SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+						SetDescriptionf("**%s** does not have access to the campaign mode.", account.DisplayName).
+						Build(),
+					).
+					ClearContent().
+					Build(),
+				)
+				return err
+			}
 			return err
 		}
 
@@ -33,11 +129,6 @@ var Daily = Command{
 		}
 
 		day := profile.ProfileChanges[0].Profile.Stats.Attributes.DailyRewards.TotalDaysLoggedIn
-
-		account, err := blast.FetchAccountInformation(credentials)
-		if err != nil {
-			return err
-		}
 
 		avatarURL, err := blast.FetchAvatarURL(credentials)
 		if err != nil {
@@ -55,9 +146,9 @@ var Daily = Command{
 			dayIndex := day - dayOffset + i + 1
 
 			if dayIndex <= day {
-				weeklyRewardsStr += fmt.Sprintf("`%d:` ~~%s~~", dayIndex, RewardGraph[dayIndex%336].Item)
+				weeklyRewardsStr += fmt.Sprintf("`%d` ~~%s~~", dayIndex, RewardGraph[dayIndex%336].Item)
 			} else {
-				weeklyRewardsStr += fmt.Sprintf("`%d:` %s", dayIndex, RewardGraph[dayIndex%336].Item)
+				weeklyRewardsStr += fmt.Sprintf("`%d` %s", dayIndex, RewardGraph[dayIndex%336].Item)
 			}
 
 			if i != 6 {
@@ -75,7 +166,7 @@ var Daily = Command{
 			if len(profile.Notifications[0].Items) > 0 {
 				fields = append(fields, discord.EmbedField{
 					Name:   "Today's Reward Claimed",
-					Value:  fmt.Sprintf("`%d:` %s", day, todaysReward),
+					Value:  fmt.Sprintf("`%d` %s", day, todaysReward),
 					Inline: djson.Ptr(true),
 				})
 			}
@@ -88,7 +179,7 @@ var Daily = Command{
 				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).
 				SetAuthorNamef(account.DisplayName).
-				SetTitle("Daily Rewards").
+				SetTitlef("Day %d", day).
 				Build(),
 			).
 			Build(),

@@ -6,6 +6,7 @@ import (
 	"blast/db"
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -29,7 +30,7 @@ var Logout = Command{
 		if data.Bool("bulk") {
 			col := db.GetCollection("users")
 
-			_, err := col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID.String()}, bson.M{"$set": bson.M{"accounts": bson.M{}}})
+			_, err := col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$set": bson.M{"accounts": bson.M{}}})
 			if err != nil {
 				return err
 			}
@@ -55,6 +56,16 @@ var Logout = Command{
 		for _, account := range user.Accounts {
 			refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
 			if err != nil {
+				if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
+					log.Println(account.AccountID)
+					col := db.GetCollection("users")
+					_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": account.AccountID}}})
+					if err != nil {
+						return err
+					}
+
+					continue
+				}
 				return err
 			}
 
