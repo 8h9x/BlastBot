@@ -4,6 +4,7 @@ import (
 	"blast/api"
 	"blast/api/consts"
 	"blast/db"
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var account = discord.SlashCommandCreate{
@@ -78,8 +80,8 @@ var AccountInfo = Command{
 			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).
 			SetAuthorNamef("%s | %s", account.DisplayName, credentials.AccountID).
-			AddField("<:llama:1096476378121126000> Season Level", fmt.Sprint(attributes.AccountLevel), true).
-			AddField(fmt.Sprintf("%s Battlepass Level", bpEmoji), fmt.Sprint(attributes.Level), true).
+			AddField("<:llama:1096476378121126000> Account Level", fmt.Sprint(attributes.AccountLevel), true).
+			AddField(fmt.Sprintf("%s Season Level", bpEmoji), fmt.Sprint(attributes.Level), true).
 			AddField("<:battle_star:1096473613504368640> Battlestars", fmt.Sprint(attributes.Battlestars), true).
 			AddField("<:xp:1096486771820347453> Season XP", fmt.Sprint(attributes.XP), true).
 			AddField("<:goldbars:1096469831034863637> Bars", fmt.Sprint(brInfo.Stash.Globalcash), true).
@@ -104,6 +106,15 @@ var AccountSwitch = Command{
 		for i, account := range user.Accounts {
 			refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
 			if err != nil {
+				if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
+					col := db.GetCollection("users")
+					_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": account.AccountID}}})
+					if err != nil {
+						return err
+					}
+
+					continue
+				}
 				return err
 			}
 

@@ -23,12 +23,12 @@ func SwitchAccountSelect(e *handler.ComponentEvent) error {
 
 	col := db.GetCollection("users")
 
-	_, err = col.UpdateOne(context.Background(), bson.M{"discordId": user.ID.String()}, bson.M{"$set": bson.M{"selectedAccount": accountIndex}})
+	_, err = col.UpdateOne(context.Background(), bson.M{"discordId": user.ID}, bson.M{"$set": bson.M{"selectedAccount": accountIndex}})
 	if err != nil {
 		return err
 	}
 
-	userEntry, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": user.ID.String()})
+	userEntry, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": user.ID})
 	if err != nil {
 		return err
 	}

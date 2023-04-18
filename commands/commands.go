@@ -13,10 +13,12 @@ var Commands = []discord.ApplicationCommandCreate{
 	auth,
 	daily,
 	// ephemeral,
+	locker,
 	login,
 	logout,
 	mcp,
 	mnemonic,
+	vbucks,
 	// test,
 }
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"blast/api/consts"
+	"blast/fortnite"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,11 +11,18 @@ import (
 
 type EpicClient struct {
 	httpClient *http.Client
+	Fortnite   *fortnite.Fortnite
 }
 
 func New() *EpicClient {
+	fn, err := fortnite.New()
+	if err != nil {
+		panic(err)
+	}
+
 	return &EpicClient{
 		httpClient: &http.Client{},
+		Fortnite:   fn,
 	}
 }
 
