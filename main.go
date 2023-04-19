@@ -188,7 +188,7 @@ func CommandHandlerWrapper(c commands.Command, aknowledge bool) handler.CommandH
 
 		if len(user.Accounts) == 0 && c.LoginRequired {
 			embed := discord.NewEmbedBuilder().
-				SetColor(0xCBA6F7).
+				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).
 				SetTitle("<:llama:1096476378121126000> Not the llama you're looking for!").
 				SetDescription("You do not have any saved accounts.\nAdd one using the `/login` command.").

@@ -29,3 +29,5 @@ var Template = Command{
 	LoginRequired:     true,
 	EphemeralResponse: false,
 }
+
+// https://user-search-service-prod.ol.epicgames.com/api/v1/search
