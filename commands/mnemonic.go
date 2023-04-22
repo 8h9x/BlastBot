@@ -4,7 +4,7 @@ import (
 	"blast/api"
 	"blast/db"
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -52,12 +52,29 @@ var mnemonic = discord.SlashCommandCreate{
 
 var MnemonicFavoritesAdd = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		err := blast.AddFavoriteMnemonic(credentials, data.String("mnemonic"))
+		mnemonic := data.String("mnemonic")
+
+		err := blast.AddFavoriteMnemonic(credentials, mnemonic)
 		if err != nil {
 			return err
 		}
 
-		return fmt.Errorf("added favorite")
+		info, err := blast.FetchMnemonicInfo(credentials, mnemonic)
+		if err != nil {
+			return err
+		}
+
+		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+			SetEmbeds(discord.NewEmbedBuilder().
+				SetTitlef("Mnemonic has been favorited!").
+				SetDescriptionf("`%s | %s`", info.Metadata.Title, mnemonic).
+				SetColor(0xFB5A32).
+				SetTimestamp(time.Now()).
+				Build(),
+			).
+			Build(),
+		)
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: false,
@@ -73,12 +90,29 @@ var MnemonicFavoritesList = Command{
 
 var MnemonicFavoritesRemove = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		err := blast.RemoveFavoriteMnemonic(credentials, data.String("mnemonic"))
+		mnemonic := data.String("mnemonic")
+
+		err := blast.RemoveFavoriteMnemonic(credentials, mnemonic)
 		if err != nil {
 			return err
 		}
 
-		return fmt.Errorf("removed favorite")
+		info, err := blast.FetchMnemonicInfo(credentials, mnemonic)
+		if err != nil {
+			return err
+		}
+
+		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+			SetEmbeds(discord.NewEmbedBuilder().
+				SetTitlef("Mnemonic has been unfavorited!").
+				SetDescriptionf("`%s | %s`", info.Metadata.Title, mnemonic).
+				SetColor(0xFB5A32).
+				SetTimestamp(time.Now()).
+				Build(),
+			).
+			Build(),
+		)
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: false,
@@ -86,14 +120,36 @@ var MnemonicFavoritesRemove = Command{
 
 var MnemonicInfo = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		res, err := blast.FetchMnemonicInfo(credentials, data.String("mnemonic"))
+		mnemonic := data.String("mnemonic")
+
+		info, err := blast.FetchMnemonicInfo(credentials, mnemonic)
 		if err != nil {
 			return err
 		}
 
-		log.Println(res)
+		imageURL := info.Metadata.ImageURL
+		if imageURL == "" {
+			imageURL = info.Metadata.GeneratedIslandUrlsOld.URL
+		}
 
-		return fmt.Errorf("data logged to console")
+		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
+			SetEmbeds(discord.NewEmbedBuilder().
+				SetTitlef("%s | %s", info.Metadata.Title, mnemonic).
+				SetDescription(info.Metadata.Tagline).
+				SetThumbnail(imageURL).
+				SetColor(0xFB5A32).
+				SetTimestamp(time.Now()).
+				AddField("Author", info.CreatorName, true).
+				AddField("Version", fmt.Sprint(info.Version), true).
+				AddField("Link Type", info.LinkType, true).
+				AddField("Publish Date", info.Published.String(), true).
+				AddField("XP Calibration Phase", info.Metadata.DynamicXp.CalibrationPhase, true).
+				AddField("Active", BoolToEmoji(info.Active), true).
+				Build(),
+			).
+			Build(),
+		)
+		return err
 	},
 	LoginRequired:     true,
 	EphemeralResponse: false,

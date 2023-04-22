@@ -66,7 +66,7 @@ var locker = discord.SlashCommandCreate{
 	},
 }
 
-var Locker = Command{
+var LockerImage = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
 		startTime := time.Now()
 		cosmeticType := data.String("type")
@@ -396,14 +396,14 @@ var typeOrder = map[string]int{
 // 	"wrap":          "AthenaItemWrap",
 // }
 
-func contains(arr []string, str string) bool {
-	for _, s := range arr {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
+// func contains(arr []string, str string) bool {
+// 	for _, s := range arr {
+// 		if s == str {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 /*
 	{Name: "Backblings", Value: "backpack"},

@@ -4,7 +4,6 @@ import (
 	"blast/api"
 	"blast/db"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -35,8 +34,6 @@ func Vbucks(manager *paginator.Manager) Command {
 				if err != nil {
 					return err
 				}
-
-				log.Println(offerRes)
 
 				offer := offerRes[offerID]
 

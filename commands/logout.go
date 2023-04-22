@@ -35,6 +35,11 @@ var Logout = Command{
 				return err
 			}
 
+			_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$set": bson.M{"selectedAccount": 0}})
+			if err != nil {
+				return err
+			}
+
 			embed := discord.NewEmbedBuilder().
 				SetColor(0xFB5A32).
 				SetTimestamp(time.Now()).

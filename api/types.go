@@ -88,14 +88,15 @@ type MnemonicInfoResponse struct {
 	LinkType        string    `json:"linkType"`
 	Metadata        struct {
 		DynamicXp struct {
-			CalibrationPhase  string `json:"calibrationPhase"`
-			UniqueGameVersion int    `json:"uniqueGameVersion"`
+			CalibrationPhase string `json:"calibrationPhase"`
+			// UniqueGameVersion string `json:"uniqueGameVersion"` // somtimes int, sometimes string
 		} `json:"dynamicXp"`
 		GeneratedIslandUrlsOld struct {
 			URL  string `json:"url"`
 			URLM string `json:"url_m"`
 			URLS string `json:"url_s"`
 		} `json:"generated_island_urls_old"`
+		ImageURL     string `json:"image_url"`
 		Introduction string `json:"introduction"`
 		IslandType   string `json:"islandType"`
 		Locale       string `json:"locale"`
@@ -115,10 +116,11 @@ type MnemonicInfoResponse struct {
 		Tagline     string `json:"tagline"`
 		Title       string `json:"title"`
 	} `json:"metadata"`
-	Mnemonic         string `json:"mnemonic"`
-	ModerationStatus string `json:"moderationStatus"`
-	Namespace        string `json:"namespace"`
-	Version          int    `json:"version"`
+	Mnemonic         string    `json:"mnemonic"`
+	ModerationStatus string    `json:"moderationStatus"`
+	Namespace        string    `json:"namespace"`
+	Published        time.Time `json:"published"`
+	Version          int       `json:"version"`
 }
 
 type AccountInformation struct {

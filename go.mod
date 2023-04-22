@@ -10,7 +10,9 @@ require (
 	github.com/disgoorg/snowflake/v2 v2.0.1
 	github.com/fogleman/gg v1.3.0
 	github.com/joho/godotenv v1.5.1
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	go.mongodb.org/mongo-driver v1.11.4
+	golang.org/x/text v0.9.0
 )
 
 require (
@@ -19,7 +21,6 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20210812194225-61421b77c44b // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -31,5 +32,4 @@ require (
 	golang.org/x/image v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
 )

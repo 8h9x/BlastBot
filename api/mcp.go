@@ -59,7 +59,7 @@ type AthenaProfile[T interface{}] struct {
 type AthenaProfileData[T interface{}] struct {
 	Created         string             `json:"created"`
 	Updated         string             `json:"updated"`
-	Rvn             int64              `json:"rvn"`
+	RVN             int64              `json:"rvn"`
 	WipeNumber      int64              `json:"wipeNumber"`
 	AccountID       string             `json:"accountId"`
 	ProfileID       string             `json:"profileId"`
@@ -297,7 +297,7 @@ type CampaignProfile struct {
 type CampaignProfileData struct {
 	Created         string                               `json:"created"`
 	Updated         string                               `json:"updated"`
-	Rvn             int                                  `json:"rvn"`
+	RVN             int                                  `json:"rvn"`
 	WipeNumber      int                                  `json:"wipeNumber"`
 	AccountID       string                               `json:"accountId"`
 	ProfileID       string                               `json:"profileId"`
@@ -308,9 +308,11 @@ type CampaignProfileData struct {
 }
 
 type CampaignProfileItemEntry struct {
-	TemplateID string      `json:"templateId"`
-	Quantity   int         `json:"quantity"`
-	Attributes interface{} `json:"attributes"`
+	TemplateID string `json:"templateId"`
+	Quantity   int    `json:"quantity"`
+	Attributes struct {
+		QuestState string `json:"quest_state"`
+	} `json:"attributes"`
 }
 
 type CampaignProfileStats struct {
@@ -388,5 +390,138 @@ type CampaignProfileStats struct {
 		LastAppliedLoadout string `json:"last_applied_loadout"`
 		XP                 int    `json:"xp"`
 		PacksGranted       int    `json:"packs_granted"`
+	} `json:"attributes"`
+}
+
+type CommonCoreProfile struct {
+	ProfileRevision            int    `json:"profileRevision"`
+	ProfileId                  string `json:"profileId"`
+	ProfileChangesBaseRevision int    `json:"profileChangesBaseRevision"`
+	ProfileCommandRevision     int    `json:"profileCommandRevision"`
+	ServerTime                 string `json:"serverTime"`
+	ResponseVersion            int    `json:"responseVersion"`
+	ProfileChanges             []struct {
+		ChangeType string                `json:"changeType"`
+		Profile    CommonCoreProfileData `json:"profile"`
+	} `json:"profileChanges"`
+}
+
+type CommonCoreProfileData struct {
+	Created         string                                 `json:"created"`
+	Updated         string                                 `json:"updated"`
+	RVN             int                                    `json:"rvn"`
+	WipeNumber      int                                    `json:"wipeNumber"`
+	AccountID       string                                 `json:"accountId"`
+	ProfileID       string                                 `json:"profileId"`
+	Version         string                                 `json:"version"`
+	CommandRevision int                                    `json:"commandRevision"`
+	Items           map[string]*CommonCoreProfileItemEntry `json:"items"`
+	Stats           CommonCoreProfileStats                 `json:"stats"`
+}
+
+type CommonCoreProfileItemEntry struct {
+	TemplateID string `json:"templateId"`
+	Quantity   int    `json:"quantity"`
+	Attributes struct {
+		Platform string `json:"platform"`
+	} `json:"attributes"`
+}
+
+type CommonCoreProfileStats struct {
+	Attributes struct {
+		SurveyData struct {
+			AllSurveysMetadata struct {
+				NumTimesCompleted int    `json:"numTimesCompleted"`
+				LastTimeCompleted string `json:"lastTimeCompleted"`
+			} `json:"allSurveysMetadata"`
+			Metadata map[string]struct {
+				NumTimesCompleted int    `json:"numTimesCompleted"`
+				LastTimeCompleted string `json:"lastTimeCompleted"`
+			} `json:"metadata"`
+		} `json:"survey_data"`
+		IntroGamePlayed    bool `json:"intro_game_played"`
+		MtxPurchaseHistory struct {
+			RefundsUsed               int    `json:"refundsUsed"`
+			RefundCredits             int    `json:"refundCredits"`
+			TokenRefreshReferenceTime string `json:"tokenRefreshReferenceTime"`
+			Purchases                 []struct {
+				PurchaseID         string        `json:"purchaseId"`
+				OfferID            string        `json:"offerId"`
+				PurchaseDate       string        `json:"purchaseDate"`
+				FreeRefundEligible bool          `json:"freeRefundEligible"`
+				Fulfillments       []interface{} `json:"fulfillments"`
+				LootResult         []struct {
+					ItemType    string `json:"itemType"`
+					ItemGUID    string `json:"itemGuid"`
+					ItemProfile string `json:"itemProfile"`
+					Quantity    int    `json:"quantity"`
+				} `json:"lootResult"`
+				TotalMtxPaid int `json:"totalMtxPaid"`
+				Metadata     struct {
+				} `json:"metadata"`
+				GameContext string `json:"gameContext"`
+				RefundDate  string `json:"refundDate,omitempty"`
+				UndoTimeout string `json:"undoTimeout,omitempty"`
+			} `json:"purchases"`
+		} `json:"mtx_purchase_history"`
+		UndoCooldowns []struct {
+			OfferID         string `json:"offerId"`
+			CooldownExpires string `json:"cooldownExpires"`
+		} `json:"undo_cooldowns"`
+		MtxAffiliateSetTime string `json:"mtx_affiliate_set_time"`
+		CurrentMtxPlatform  string `json:"current_mtx_platform"`
+		MtxAffiliate        string `json:"mtx_affiliate"`
+		WeeklyPurchases     struct {
+			LastInterval string         `json:"lastInterval"`
+			PurchaseList map[string]int `json:"purchaseList"`
+		} `json:"weekly_purchases"`
+		DailyPurchases struct {
+			LastInterval string         `json:"lastInterval"`
+			PurchaseList map[string]int `json:"purchaseList"`
+		} `json:"daily_purchases"`
+		InAppPurchases struct {
+			Receipts          []string       `json:"receipts"`
+			IgnoredReceipts   []interface{}  `json:"ignoredReceipts"`
+			FulfillmentCounts map[string]int `json:"fulfillmentCounts"`
+			RefreshTimers     map[string]struct {
+				NextEntitlementRefresh string `json:"nextEntitlementRefresh"`
+			} `json:"refreshTimers"`
+		} `json:"in_app_purchases"`
+		ForcedIntroPlayed  string `json:"forced_intro_played"`
+		RmtPurchaseHistory struct {
+			Purchases []struct {
+				FulfillmentID string `json:"fulfillmentId"`
+				PurchaseDate  string `json:"purchaseDate"`
+				LootResult    []struct {
+					ItemType    string `json:"itemType"`
+					ItemGUID    string `json:"itemGuid"`
+					ItemProfile string `json:"itemProfile"`
+					Attributes  struct {
+						Platform string `json:"platform"`
+					} `json:"attributes"`
+					Quantity int `json:"quantity"`
+				} `json:"lootResult"`
+			} `json:"purchases"`
+		} `json:"rmt_purchase_history"`
+		UndoTimeout      string `json:"undo_timeout"`
+		MonthlyPurchases struct {
+			LastInterval string         `json:"lastInterval"`
+			PurchaseList map[string]int `json:"purchaseList"`
+		} `json:"monthly_purchases"`
+		AllowedToSendGifts    bool   `json:"allowed_to_send_gifts"`
+		MfaEnabled            bool   `json:"mfa_enabled"`
+		AllowedToReceiveGifts bool   `json:"allowed_to_receive_gifts"`
+		MtxAffiliateID        string `json:"mtx_affiliate_id"`
+		GiftHistory           struct {
+			NumSent      int               `json:"num_sent"`
+			SentTo       map[string]string `json:"sentTo"`
+			NumReceived  int               `json:"num_received"`
+			ReceivedFrom map[string]string `json:"receivedFrom"`
+			Gifts        []struct {
+				Date        string `json:"date"`
+				OfferID     string `json:"offerId"`
+				ToAccountID string `json:"toAccountId"`
+			} `json:"gifts"`
+		} `json:"gift_history"`
 	} `json:"attributes"`
 }

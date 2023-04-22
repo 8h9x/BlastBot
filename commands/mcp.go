@@ -2,7 +2,6 @@ package commands
 
 import (
 	"blast/api"
-	"blast/api/consts"
 	"blast/db"
 	"fmt"
 	"io"
@@ -52,11 +51,6 @@ var mcp = discord.SlashCommandCreate{
 
 var MCP = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, user.Accounts[user.SelectedAccount].RefreshToken)
-		if err != nil {
-			return err
-		}
-
 		operation, profileId, customBodyURL, customBody := data.String("operation"), data.String("profile"), data.Attachment("body").URL, "{}"
 
 		if customBodyURL != "" {
@@ -68,7 +62,7 @@ var MCP = Command{
 			customBody = body
 		}
 
-		res, err := blast.ProfileOperationStr(refreshCredentials, operation, profileId, customBody)
+		res, err := blast.ProfileOperationStr(credentials, operation, profileId, customBody)
 		if err != nil {
 			return err
 		}

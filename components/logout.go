@@ -24,6 +24,11 @@ func LogoutAccountSelect(e *handler.ComponentEvent) error {
 		return err
 	}
 
+	_, err = col.UpdateOne(context.Background(), bson.M{"discordId": user.ID}, bson.M{"$inc": bson.M{"selectedAccount": -1}})
+	if err != nil {
+		return err
+	}
+
 	userEntry, err := db.Fetch[db.UserEntry]("users", bson.M{"discordId": user.ID})
 	if err != nil {
 		return err

@@ -101,19 +101,18 @@ func main() {
 		config.ExpireTime = 2 * time.Minute
 	})
 
-	// h.Command("/test", commands.TestHandler)
-	// h.Command("/login", commands.LoginHandler)
-	// h.Autocomplete("/test", commands.TestAutocompleteHandler)
-	// h.Component("test_button", components.TestComponent)
 	h.Command("/account/info", CommandHandlerWrapper(commands.AccountInfo, true))
 	h.Command("/account/switch", CommandHandlerWrapper(commands.AccountSwitch, true))
+	h.Command("/account/vbucks", CommandHandlerWrapper(commands.AccountVbucks, true))
 	h.Command("/auth/bearer", CommandHandlerWrapper(commands.AuthBearer, true))
 	h.Command("/auth/client", CommandHandlerWrapper(commands.AuthClient, true))
 	h.Command("/auth/device", CommandHandlerWrapper(commands.AuthDevice, true))
 	h.Command("/auth/exchange", CommandHandlerWrapper(commands.AuthExchange, true))
 	h.Command("/daily", CommandHandlerWrapper(commands.Daily, true))
 	// h.Command("/ephemeral", CommandHandlerWrapper(commands.EphemeralCrowns))
-	h.Command("/locker/image", CommandHandlerWrapper(commands.Locker, true))
+	h.Command("/invite", CommandHandlerWrapper(commands.Invite, true))
+	h.Command("/launch", CommandHandlerWrapper(commands.Launch, true))
+	h.Command("/locker/image", CommandHandlerWrapper(commands.LockerImage, true))
 	h.Command("/login", CommandHandlerWrapper(commands.Login, true))
 	h.Command("/logout", CommandHandlerWrapper(commands.Logout, true))
 	h.Command("/mcp", CommandHandlerWrapper(commands.MCP, true))
@@ -121,6 +120,8 @@ func main() {
 	h.Command("/mnemonic/favorites/list", CommandHandlerWrapper(commands.MnemonicFavoritesList, true))
 	h.Command("/mnemonic/favorites/remove", CommandHandlerWrapper(commands.MnemonicFavoritesRemove, true))
 	h.Command("/mnemonic/info", CommandHandlerWrapper(commands.MnemonicInfo, true))
+	// h.Command("/offers", CommandHandlerWrapper(commands.Offers(manager), false))
+	h.Command("/skiptutorial", CommandHandlerWrapper(commands.SkipTutorial, true))
 	h.Command("/vbucks", CommandHandlerWrapper(commands.Vbucks(manager), false))
 
 	h.Component("cancel", ComponentHandlerWrapper(components.Cancel))
@@ -171,9 +172,9 @@ func main() {
 	logger.Info("Shutting down...")
 }
 
-func CommandHandlerWrapper(c commands.Command, aknowledge bool) handler.CommandHandler {
+func CommandHandlerWrapper(c commands.Command, acknowledge bool) handler.CommandHandler {
 	return func(event *handler.CommandEvent) error {
-		if aknowledge {
+		if acknowledge {
 			event.DeferCreateMessage(c.EphemeralResponse)
 		}
 
@@ -210,6 +211,11 @@ func CommandHandlerWrapper(c commands.Command, aknowledge bool) handler.CommandH
 						return err
 					}
 
+					_, err = col.UpdateOne(context.Background(), bson.M{"discordId": user.ID}, bson.M{"$inc": bson.M{"selectedAccount": -1}})
+					if err != nil {
+						return err
+					}
+
 					CommandHandlerErrorRespond(event, errors.New("your account has been removed from the database due to an invalid refresh token. please /login again to add it back"))
 				}
 				CommandHandlerErrorRespond(event, err)
@@ -229,10 +235,10 @@ func CommandHandlerWrapper(c commands.Command, aknowledge bool) handler.CommandH
 func CommandHandlerErrorRespond(event *handler.CommandEvent, err error) {
 	event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 		SetEmbeds(discord.NewEmbedBuilder().
-			SetColor(0xCBA6F7).
+			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).
 			SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
-			SetDescriptionf("```\n%s\n```", err.Error()).
+			SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error()).
 			Build(),
 		).
 		Build(),
