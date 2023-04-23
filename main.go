@@ -110,6 +110,7 @@ func main() {
 	h.Command("/auth/exchange", CommandHandlerWrapper(commands.AuthExchange, true))
 	h.Command("/daily", CommandHandlerWrapper(commands.Daily, true))
 	// h.Command("/ephemeral", CommandHandlerWrapper(commands.EphemeralCrowns))
+	h.Command("/friends/add", CommandHandlerWrapper(commands.FriendsAdd, true))
 	h.Command("/invite", CommandHandlerWrapper(commands.Invite, true))
 	h.Command("/launch", CommandHandlerWrapper(commands.Launch, true))
 	h.Command("/locker/image", CommandHandlerWrapper(commands.LockerImage, true))
@@ -121,6 +122,7 @@ func main() {
 	h.Command("/mnemonic/favorites/remove", CommandHandlerWrapper(commands.MnemonicFavoritesRemove, true))
 	h.Command("/mnemonic/info", CommandHandlerWrapper(commands.MnemonicInfo, true))
 	// h.Command("/offers", CommandHandlerWrapper(commands.Offers(manager), false))
+	h.Command("/ping", CommandHandlerWrapper(commands.Ping, true))
 	h.Command("/skiptutorial", CommandHandlerWrapper(commands.SkipTutorial, true))
 	h.Command("/vbucks", CommandHandlerWrapper(commands.Vbucks(manager), false))
 
@@ -128,13 +130,15 @@ func main() {
 	h.Component("switch_account_select", components.SwitchAccountSelect)
 	h.Component("logout_account_select", components.LogoutAccountSelect)
 
+	h.Autocomplete("/friends/add", components.UserSearchAutocomplete)
+
 	client, err := disgo.New(os.Getenv("DISCORD_TOKEN"),
 		bot.WithLogger(logger),
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentGuilds, gateway.IntentGuildMessages)),
 		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds)),
 		bot.WithEventListeners(h, manager),
 		bot.WithEventListenerFunc(func(e *events.Ready) {
-			logger.Info("Blast! is ready!")
+			logger.Info("Connected to discord gateway.")
 		}),
 	)
 	if err != nil {
@@ -233,12 +237,19 @@ func CommandHandlerWrapper(c commands.Command, acknowledge bool) handler.Command
 }
 
 func CommandHandlerErrorRespond(event *handler.CommandEvent, err error) {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xFB5A32).
+		SetTimestamp(time.Now()).
+		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+		SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error())
+
+	switch err := err.(type) {
+	case *api.RequestError:
+		embed.SetFooterText(err.Raw.ErrorCode)
+	}
+
 	event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
-		SetEmbeds(discord.NewEmbedBuilder().
-			SetColor(0xFB5A32).
-			SetTimestamp(time.Now()).
-			SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
-			SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error()).
+		SetEmbeds(embed.
 			Build(),
 		).
 		Build(),

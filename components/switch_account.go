@@ -40,7 +40,7 @@ func SwitchAccountSelect(e *handler.ComponentEvent) error {
 		return err
 	}
 
-	account, err := blast.FetchAccountInformation(credentials)
+	account, err := blast.FetchMyAccountInfo(credentials)
 	if err != nil {
 		return err
 	}

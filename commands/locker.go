@@ -177,7 +177,7 @@ var LockerImage = Command{
 			return err
 		}
 
-		accountInfo, err := blast.FetchAccountInformation(credentials)
+		accountInfo, err := blast.FetchMyAccountInfo(credentials)
 		if err != nil {
 			return err
 		}

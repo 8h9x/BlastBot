@@ -184,7 +184,7 @@ var Login = Command{
 			return err
 		}
 
-		accountInfo, err := blast.FetchAccountInformation(refreshCredentials)
+		accountInfo, err := blast.FetchMyAccountInfo(refreshCredentials)
 		if err != nil {
 			return err
 		}

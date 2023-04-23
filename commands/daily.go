@@ -65,7 +65,7 @@ var Daily = Command{
 				day := profile.ProfileChanges[0].Profile.Stats.Attributes.DailyRewards.TotalDaysLoggedIn
 				todaysReward := RewardGraph[day%336].Item
 
-				accountInfo, err := blast.FetchAccountInformation(refreshCredentials)
+				accountInfo, err := blast.FetchMyAccountInfo(refreshCredentials)
 				if err != nil {
 					return err
 				}
@@ -96,7 +96,7 @@ var Daily = Command{
 			return err
 		}
 
-		account, err := blast.FetchAccountInformation(credentials)
+		account, err := blast.FetchMyAccountInfo(credentials)
 		if err != nil {
 			return err
 		}

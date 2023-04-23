@@ -19,7 +19,7 @@ var skipTutorial = discord.SlashCommandCreate{
 
 var SkipTutorial = Command{
 	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		account, err := blast.FetchAccountInformation(credentials)
+		account, err := blast.FetchMyAccountInfo(credentials)
 		if err != nil {
 			return err
 		}

@@ -135,7 +135,7 @@ type AccountInformation struct {
 	FailedLoginAttempts        int       `json:"failedLoginAttempts"`
 	HasHashedEmail             bool      `json:"hasHashedEmail"`
 	Headless                   bool      `json:"headless"`
-	Id                         string    `json:"id"`
+	ID                         string    `json:"id"`
 	LastDisplayNameChange      time.Time `json:"lastDisplayNameChange"`
 	LastLogin                  time.Time `json:"lastLogin"`
 	LastName                   string    `json:"lastName"`
@@ -145,7 +145,7 @@ type AccountInformation struct {
 	Name                       string    `json:"name"`
 	NumberOfDisplayNameChanges int       `json:"numberOfDisplayNameChanges"`
 	PreferredLanguage          string    `json:"preferredLanguage"`
-	TfaEnabled                 bool      `json:"tfaEnabled"`
+	TFAEnabled                 bool      `json:"tfaEnabled"`
 }
 
 type ExchangeResponse struct {

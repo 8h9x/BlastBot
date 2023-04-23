@@ -8,24 +8,8 @@ import (
 	"strings"
 )
 
-func (c EpicClient) FetchAccountInformation(credentials UserCredentialsResponse) (AccountInformation, error) {
-	headers := http.Header{}
-	headers.Set("Authorization", "Bearer "+credentials.AccessToken)
-
-	resp, err := c.Request("GET", fmt.Sprintf("https://account-public-service-prod.ol.epicgames.com/account/api/public/account/%s", credentials.AccountID), headers, "")
-	if err != nil {
-		return AccountInformation{}, err
-	}
-
-	defer resp.Body.Close()
-
-	var res AccountInformation
-	err = json.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
-		return AccountInformation{}, err
-	}
-
-	return res, nil
+func (c EpicClient) FetchMyAccountInfo(credentials UserCredentialsResponse) (AccountInformation, error) {
+	return c.FetchUserByAccountID(credentials, credentials.AccountID)
 }
 
 func (c EpicClient) FetchAccountBRInfo(credentials UserCredentialsResponse) (BRInfo, error) {
