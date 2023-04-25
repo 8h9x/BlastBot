@@ -1,8 +1,9 @@
 package commands
 
 import (
-	"blast/api"
+	"blast/common"
 	"blast/db"
+	"github.com/0xDistrust/Vinderman"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -16,7 +17,7 @@ var ping = discord.SlashCommandCreate{
 }
 
 var Ping = Command{
-	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
+	Handler: func(event *handler.CommandEvent, client *common.Client, user db.UserEntry, credentials vinderman.UserCredentials, data discord.SlashCommandInteractionData) error {
 		var gatewayPing string
 		if event.Client().HasGateway() {
 			gatewayPing = event.Client().Gateway().Latency().String()

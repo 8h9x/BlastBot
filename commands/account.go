@@ -1,12 +1,14 @@
 package commands
 
 import (
-	"blast/api"
-	"blast/api/consts"
+	"blast/common"
 	"blast/db"
 	"context"
 	"encoding/json"
 	"fmt"
+	vinderman "github.com/0xDistrust/Vinderman"
+	"github.com/0xDistrust/Vinderman/consts"
+	"github.com/0xDistrust/Vinderman/request"
 	"strings"
 	"time"
 
@@ -41,29 +43,28 @@ var account = discord.SlashCommandCreate{
 }
 
 var AccountInfo = Command{
-	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
-		account, err := blast.FetchMyAccountInfo(credentials)
+	Handler: func(event *handler.CommandEvent, client *common.Client, user db.UserEntry, credentials vinderman.UserCredentials, data discord.SlashCommandInteractionData) error {
+		account, err := client.Epic.FetchMe(credentials)
 		if err != nil {
 			return err
 		}
 
-		brInfo, err := blast.FetchAccountBRInfo(credentials)
+		brInfo, err := client.Epic.FetchBRInventory(credentials)
 		if err != nil {
 			return err
 		}
 
-		athenaProfile, err := blast.ProfileOperationStr(credentials, "QueryProfile", "athena", "{}")
+		resp, err := client.Epic.ComposeProfileOperation(credentials, "QueryProfile", "athena", "{}")
 		if err != nil {
 			return err
 		}
 
-		defer athenaProfile.Close()
-
-		var profile api.AthenaProfile[api.AthenaProfileLockerItem]
-		err = json.NewDecoder(athenaProfile).Decode(&profile)
+		res, err := request.ResponseParser[vinderman.Profile[vinderman.AthenaProfileStats]](resp)
 		if err != nil {
 			return err
 		}
+
+		profile := res.Body
 
 		attributes := profile.ProfileChanges[0].Profile.Stats.Attributes
 
@@ -73,13 +74,19 @@ var AccountInfo = Command{
 		}
 
 		skinCount := 0
-		for _, slot := range profile.ProfileChanges[0].Profile.Items {
-			if strings.HasPrefix(slot.TemplateID, "AthenaCharacter") {
+		for _, item := range profile.ProfileChanges[0].Profile.Items {
+			var cosmetic vinderman.AthenaCosmeticItem
+			if err = json.Unmarshal(item, &cosmetic); err != nil {
+				// not a skin; (you should probably add an additional check to ensure that it isnt some other type of error occurring); TODO: abstract this to a helper function that properly error checks and returns an empty state of the type passed if the type of data doesnt match
+				continue
+			}
+
+			if strings.HasPrefix(cosmetic.TemplateID, "AthenaCharacter") {
 				skinCount++
 			}
 		}
 
-		avatarURL, err := blast.FetchAvatarURL(credentials)
+		avatarURL, err := client.Epic.FetchAvatarURL(credentials)
 		if err != nil {
 			return err
 		}
@@ -97,7 +104,7 @@ var AccountInfo = Command{
 			AddField("<:victory:1096481674872770591> Lifetime Wins", fmt.Sprint(attributes.LifetimeWins), true).
 			// AddField("<:victory_crown:1096481681575260314> Crown Wins", "coming soon", true).
 			AddField("<:outfit:1096486172655636561> Skin Count", fmt.Sprint(skinCount), true).
-			AddField("<:lock:1096491497987260578> MFA Reward Claimed", BoolToEmoji(attributes.MFARewardClaimed), true).
+			AddField("<:lock:1096491497987260578> MFA Reward Claimed", common.BoolToEmoji(attributes.MFARewardClaimed), true).
 			AddField(fmt.Sprintf(":flag_%s: Region", strings.ToLower(account.Country)), account.Country, true).
 			Build()
 
@@ -109,13 +116,13 @@ var AccountInfo = Command{
 }
 
 var AccountSwitch = Command{
-	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
+	Handler: func(event *handler.CommandEvent, client *common.Client, user db.UserEntry, credentials vinderman.UserCredentials, data discord.SlashCommandInteractionData) error {
 		switchOptions := make([]discord.StringSelectMenuOption, 0)
 
 		for i, account := range user.Accounts {
-			refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
+			refreshCredentials, err := client.Epic.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
 			if err != nil {
-				if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
+				if err.(*request.Error[vinderman.EpicErrorResponse]).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
 					col := db.GetCollection("users")
 					_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": account.AccountID}}})
 					if err != nil {
@@ -127,7 +134,7 @@ var AccountSwitch = Command{
 				return err
 			}
 
-			accountInfo, err := blast.FetchMyAccountInfo(refreshCredentials)
+			accountInfo, err := client.Epic.FetchMe(refreshCredentials)
 			if err != nil {
 				return err
 			}
@@ -150,16 +157,16 @@ var AccountSwitch = Command{
 }
 
 var AccountVbucks = Command{
-	Handler: func(event *handler.CommandEvent, blast api.EpicClient, user db.UserEntry, credentials api.UserCredentialsResponse, data discord.SlashCommandInteractionData) error {
+	Handler: func(event *handler.CommandEvent, client *common.Client, user db.UserEntry, credentials vinderman.UserCredentials, data discord.SlashCommandInteractionData) error {
 		if data.Bool("bulk") {
 			embed := discord.NewEmbedBuilder().SetColor(0xFB5A32).SetTimestamp(time.Now()).SetTitle("Saved Accounts V-Bucks")
 
 			bulkTotal := 0
 
 			for _, account := range user.Accounts {
-				refreshCredentials, err := blast.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
+				refreshCredentials, err := client.Epic.RefreshTokenLogin(consts.FORTNITE_PC_CLIENT_ID, consts.FORTNITE_PC_CLIENT_SECRET, account.RefreshToken)
 				if err != nil {
-					if err.(*api.RequestError).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
+					if err.(*request.Error[vinderman.EpicErrorResponse]).Raw.ErrorCode == "errors.com.epicgames.account.auth_token.invalid_refresh_token" {
 						col := db.GetCollection("users")
 						_, err = col.UpdateOne(context.Background(), bson.M{"discordId": event.User().ID}, bson.M{"$pull": bson.M{"accounts": bson.M{"accountId": account.AccountID}}})
 						if err != nil {
@@ -171,29 +178,47 @@ var AccountVbucks = Command{
 					return err
 				}
 
-				accountInfo, err := blast.FetchMyAccountInfo(refreshCredentials)
+				accountInfo, err := client.Epic.FetchMe(refreshCredentials)
 				if err != nil {
 					return err
 				}
 
-				commonCoreProfile, err := blast.ProfileOperationStr(refreshCredentials, "QueryProfile", "common_core", "{}")
-				if err != nil {
-					continue
-					// return err
-				}
+				//commonCoreProfile, err := client.Epic.ProfileOperationStr(refreshCredentials, "QueryProfile", "common_core", "{}")
+				//if err != nil {
+				//	continue
+				//	// return err
+				//}
+				//
+				//defer commonCoreProfile.Close()
+				//
+				//var profile api.CommonCoreProfile
+				//err = json.NewDecoder(commonCoreProfile).Decode(&profile)
+				//if err != nil {
+				//	return err
+				//}
 
-				defer commonCoreProfile.Close()
-
-				var profile api.CommonCoreProfile
-				err = json.NewDecoder(commonCoreProfile).Decode(&profile)
+				resp, err := client.Epic.ComposeProfileOperation(credentials, "QueryProfile", "common_core", "{}")
 				if err != nil {
 					return err
 				}
+
+				res, err := request.ResponseParser[vinderman.Profile[vinderman.CommonCoreProfileStats]](resp)
+				if err != nil {
+					return err
+				}
+
+				profile := res.Body
 
 				total := 0
 				list := ""
 
-				for _, item := range profile.ProfileChanges[0].Profile.Items {
+				for _, entry := range profile.ProfileChanges[0].Profile.Items {
+					var item vinderman.CommonCoreMtxItem
+					if err = json.Unmarshal(entry, &item); err != nil {
+						// not a skin; (you should probably add an additional check to ensure that it isnt some other type of error occurring); TODO: abstract this to a helper function that properly error checks and returns an empty state of the type passed if the type of data doesnt match
+						continue
+					}
+
 					if strings.HasPrefix(item.TemplateID, "Currency:Mtx") {
 						total += item.Quantity
 						bulkTotal += item.Quantity
@@ -209,6 +234,22 @@ var AccountVbucks = Command{
 					}
 				}
 
+				//for _, item := range profile.ProfileChanges[0].Profile.Items {
+				//	if strings.HasPrefix(item.TemplateID, "Currency:Mtx") {
+				//		total += item.Quantity
+				//		bulkTotal += item.Quantity
+				//
+				//		if len(user.Accounts) < 10 { // only show the extended list if there are less than 10 accounts
+				//			platform := VbuckPlatformsFriendly[item.Attributes.Platform]
+				//			if platform == "" {
+				//				platform = item.Attributes.Platform
+				//			}
+				//
+				//			list += fmt.Sprintf("<:vbuck:1099111673966628905> %d - *%s (%s)*\n", item.Quantity, platform, strings.Replace(item.TemplateID, "Currency:Mtx", "", 1))
+				//		}
+				//	}
+				//}
+
 				if len(user.Accounts) < 10 {
 					embed.AddField(accountInfo.DisplayName, fmt.Sprintf("<:vbuck:1099111673966628905> **%d - Total** \n%s", total, list), true)
 				} else {
@@ -222,33 +263,38 @@ var AccountVbucks = Command{
 			return err
 		}
 
-		account, err := blast.FetchMyAccountInfo(credentials)
+		account, err := client.Epic.FetchMe(credentials)
 		if err != nil {
 			return err
 		}
 
-		avatarURL, err := blast.FetchAvatarURL(credentials)
+		avatarURL, err := client.Epic.FetchAvatarURL(credentials)
 		if err != nil {
 			return err
 		}
 
-		commonCoreProfile, err := blast.ProfileOperationStr(credentials, "QueryProfile", "common_core", "{}")
+		resp, err := client.Epic.ComposeProfileOperation(credentials, "QueryProfile", "common_core", "{}")
 		if err != nil {
 			return err
 		}
 
-		defer commonCoreProfile.Close()
-
-		var profile api.CommonCoreProfile
-		err = json.NewDecoder(commonCoreProfile).Decode(&profile)
+		res, err := request.ResponseParser[vinderman.Profile[vinderman.CommonCoreProfileStats]](resp)
 		if err != nil {
 			return err
 		}
+
+		profile := res.Body
 
 		total := 0
 		list := ""
 
-		for _, item := range profile.ProfileChanges[0].Profile.Items {
+		for _, entry := range profile.ProfileChanges[0].Profile.Items {
+			var item vinderman.CommonCoreMtxItem
+			if err = json.Unmarshal(entry, &item); err != nil {
+				// not a skin; (you should probably add an additional check to ensure that it isn't some other type of error occurring); TODO: abstract this to a helper function that properly error checks and returns an empty state of the type passed if the type of data doesnt match
+				continue
+			}
+
 			if strings.HasPrefix(item.TemplateID, "Currency:Mtx") {
 				total += item.Quantity
 				platform := VbuckPlatformsFriendly[item.Attributes.Platform]
@@ -259,6 +305,18 @@ var AccountVbucks = Command{
 				list += fmt.Sprintf("<:vbuck:1099111673966628905> **%d** - %s (%s)\n", item.Quantity, platform, strings.Replace(item.TemplateID, "Currency:Mtx", "", 1))
 			}
 		}
+
+		//for _, item := range profile.ProfileChanges[0].Profile.Items {
+		//	if strings.HasPrefix(item.TemplateID, "Currency:Mtx") {
+		//		total += item.Quantity
+		//		platform := VbuckPlatformsFriendly[item.Attributes.Platform]
+		//		if platform == "" {
+		//			platform = item.Attributes.Platform
+		//		}
+		//
+		//		list += fmt.Sprintf("<:vbuck:1099111673966628905> **%d** - %s (%s)\n", item.Quantity, platform, strings.Replace(item.TemplateID, "Currency:Mtx", "", 1))
+		//	}
+		//}
 
 		_, err = event.UpdateInteractionResponse(discord.NewMessageUpdateBuilder().
 			SetEmbeds(discord.NewEmbedBuilder().
@@ -278,14 +336,6 @@ var AccountVbucks = Command{
 	},
 	LoginRequired:     true,
 	EphemeralResponse: false,
-}
-
-func BoolToEmoji(b bool) string {
-	if b {
-		return "<a:thumbs_up:1096490549218906193>"
-	}
-
-	return "<a:thumbs_down:1096490737715130388>"
 }
 
 var VbuckPlatformsFriendly = map[string]string{
