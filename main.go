@@ -72,11 +72,11 @@ func main() {
 	fmt.Printf("Created user with a struct: %+v\n", user1)
 
 	commandHandler := handler.New()
-
-	commandHandler.Command("/login", dummyCommand)
+	commandHandler.Command("/login", dummyCommand)                     // Alias for /accounts/add method: DeviceCode client: FORTNITE_PS4_US_CLIENT
+	commandHandler.Command("/logout", dummyCommand)                    // Alias for /accounts/remove {currentAccount} -- also need bulk logout
 	commandHandler.Command("/compose_mcp_request", dummyCommand)       // Create your own raw MCP request with guided components
 	commandHandler.Command("/launch", dummyCommand)                    // Generate launch args
-	commandHandler.Command("/accounts/add", dummyCommand)              // Alias for /login method: DeviceCode client: FORTNITE_PS4_US_CLIENT
+	commandHandler.Command("/accounts/add", dummyCommand)              // Add an account using any method and client
 	commandHandler.Command("/accounts/status", dummyCommand)           // Displays brief information of all accounts, number of accounts, emphasizes currently selected
 	commandHandler.Command("/accounts/switch", dummyCommand)           // Swap between synced accounts
 	commandHandler.Command("/accounts/remove", dummyCommand)           // Remove an account from management and delete it's database entry
@@ -97,7 +97,13 @@ func main() {
 	commandHandler.Command("/locker/loadouts/list", dummyCommand)      // List loadouts
 	commandHandler.Command("/lobby/equip", dummyCommand)               // Temporarily equip ANY cosmetic item in the lobby (only can be seen by peers, only works in the lobby--duh!)
 	commandHandler.Command("/lobby/crowns", dummyCommand)              // Temporarily display an arbitrary number of crowns in the lobby (only can be seen by peers, only works in the lobby--duh!)
+	commandHandler.Command("/party/invite", dummyCommand)              // Sends a party invite
+	commandHandler.Command("/party/kick", dummyCommand)                // Kick someone from your party
+	commandHandler.Command("/party/leave", dummyCommand)               // Leave your current party
 	commandHandler.Command("/profile", dummyCommand)                   // Return file from QueryProfile data for the inputted profile_id
+
+	commandHandler.Command("/auto/research", dummyCommand) // Use research points in stw
+	commandHandler.Command("/cloudstorage", dummyCommand)  // For downloading/uploading/editing game settings files
 
 	client, err := disgo.New(os.Getenv("DISCORD_BOT_TOKEN"),
 		bot.WithGatewayConfigOpts(
