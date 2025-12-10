@@ -3,21 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/disgoorg/disgo/handler"
-	"github.com/surrealdb/surrealdb.go"
-	"github.com/surrealdb/surrealdb.go/pkg/models"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+
+	"github.com/8h9x/BlastBot/database/internal/commands"
+	"github.com/8h9x/BlastBot/database/internal/database"
+	"github.com/disgoorg/disgo/handler"
+	"github.com/disgoorg/snowflake/v2"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/joho/godotenv"
-	"gitlab.com/8h9x/BlastBot/database"
 )
 
 func main() {
@@ -30,46 +30,9 @@ func main() {
 		}
 	}
 
-	// Connect to SurrealDB
-	db, err := surrealdb.New(os.Getenv("SURREALDB_CONNECTION_URL"))
-	if err != nil {
-		panic(err)
+	if err := database.Init(os.Getenv("MONGODB_URI"), "blast"); err != nil {
+		slog.Error("error while connecting to database: ", err)
 	}
-
-	// Set the namespace and database
-	if err = db.Use("BlastBot", "integ"); err != nil {
-		panic(err)
-	}
-
-	// Sign in to authentication `db`
-	authData := &surrealdb.Auth{
-		Username: os.Getenv("SURREALDB_ADMIN_USERNAME"), // use your setup username
-		Password: os.Getenv("SURREALDB_ADMIN_PASSWORD"), // use your setup password
-	}
-	token, err := db.SignIn(authData)
-	if err != nil {
-		panic(err)
-	}
-
-	// And we can later on invalidate the token if desired
-	defer func(token string) {
-		if err := db.Invalidate(); err != nil {
-			panic(err)
-		}
-	}(token)
-
-	user1, err := surrealdb.Create[interface{}](db, models.Table("users"), database.User{
-		CreatedAt: time.Now(),
-		DiscordId: "908900960791834674",
-		//EpicAccounts          []models.RecordID `json:"epic_accounts"`
-		GlobalFlags:           0,
-		SelectedEpicAccountId: "17dcac15e1554c9eb79445a96c859c81",
-		UpdatedAt:             time.Now(),
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Created user with a struct: %+v\n", user1)
 
 	commandHandler := handler.New()
 	commandHandler.Command("/login", dummyCommand)                     // Alias for /accounts/add method: DeviceCode client: FORTNITE_PS4_US_CLIENT
@@ -123,6 +86,20 @@ func main() {
 
 	if err = client.OpenGateway(context.TODO()); err != nil {
 		panic(err)
+	}
+
+	if _, exists := os.LookupEnv("PROD"); exists {
+		slog.Info("Syncing global commands")
+		_, err = client.Rest().SetGlobalCommands(client.ApplicationID(), commands.Commands)
+		if err != nil {
+			slog.Error(fmt.Sprintf("Failed to sync commands: %s", err))
+		}
+	} else {
+		slog.Info(fmt.Sprintf("Syncing dev (%s) commands", os.Getenv("DISCORD_DEV_GUILD")))
+		_, err = client.Rest().SetGuildCommands(client.ApplicationID(), snowflake.GetEnv("DISCORD_DEV_GUILD"), commands.Commands)
+		if err != nil {
+			slog.Error(fmt.Sprintf("Failed to sync commands: %s", err))
+		}
 	}
 
 	s := make(chan os.Signal, 1)
