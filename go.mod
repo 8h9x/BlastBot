@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/8h9x/vinderman v0.0.0-20251210010118-f22235a3805a // indirect
+	github.com/8h9x/vinderman v0.0.0-20251211013432-a7e7d21cea95 // indirect
 	github.com/disgoorg/json v1.2.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.3 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect

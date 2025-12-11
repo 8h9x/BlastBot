@@ -1,5 +1,7 @@
 github.com/8h9x/vinderman v0.0.0-20251210010118-f22235a3805a h1:u+UbXeDklhhwlhIZC0h761XTnT8YIA25ibdmopSsQ+8=
 github.com/8h9x/vinderman v0.0.0-20251210010118-f22235a3805a/go.mod h1:3ofSXAkz2P/X/PQCWm0jo8nz0gHho7CyxIov4ooNCUI=
+github.com/8h9x/vinderman v0.0.0-20251211013432-a7e7d21cea95 h1:34XQ39xsepenaRIvZpy+h6JjHXD+nwzsJCvlHqhLVuI=
+github.com/8h9x/vinderman v0.0.0-20251211013432-a7e7d21cea95/go.mod h1:3ofSXAkz2P/X/PQCWm0jo8nz0gHho7CyxIov4ooNCUI=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/disgoorg/disgo v0.18.16 h1:Yk6pA9TaGbuM4hWfWafH0jAfmkWvZBFY7rh49DgljGE=

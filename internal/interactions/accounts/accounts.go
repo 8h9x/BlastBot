@@ -1,8 +1,8 @@
-package commands
+package accounts
 
 import "github.com/disgoorg/disgo/discord"
 
-var accounts = discord.SlashCommandCreate{
+var Definition = discord.SlashCommandCreate{
 	Name:        "accounts",
 	Description: "Collection of commands to manage linked accounts.",
 	Options: []discord.ApplicationCommandOption{

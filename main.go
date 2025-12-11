@@ -3,20 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/8h9x/BlastBot/database/internal/commands"
 	"github.com/8h9x/BlastBot/database/internal/database"
+	"github.com/8h9x/BlastBot/database/internal/interactions"
+	"github.com/disgoorg/disgo"
+	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/snowflake/v2"
 
-	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/disgo/gateway"
 	"github.com/joho/godotenv"
 )
 
@@ -25,13 +26,13 @@ func main() {
 	if !isProd {
 		err := godotenv.Load(".env")
 		if err != nil {
-			slog.Error(fmt.Sprintf("Error loading .env file: %s", err))
+			slog.Error(fmt.Sprintf("error loading .env file: %s", err))
 			os.Exit(1)
 		}
 	}
 
 	if err := database.Init(os.Getenv("MONGODB_URI"), "blast"); err != nil {
-		slog.Error("error while connecting to database: ", err)
+		slog.Error(fmt.Sprintf("error while connecting to database: %s", err))
 	}
 
 	commandHandler := handler.New()
@@ -72,7 +73,6 @@ func main() {
 		bot.WithGatewayConfigOpts(
 			gateway.WithIntents(
 				gateway.IntentGuilds,
-				// 				gateway.IntentGuildMessages,
 				gateway.IntentDirectMessages,
 			),
 		),
@@ -88,19 +88,27 @@ func main() {
 		panic(err)
 	}
 
-	if _, exists := os.LookupEnv("PROD"); exists {
-		slog.Info("Syncing global commands")
-		_, err = client.Rest().SetGlobalCommands(client.ApplicationID(), commands.Commands)
-		if err != nil {
-			slog.Error(fmt.Sprintf("Failed to sync commands: %s", err))
-		}
-	} else {
-		slog.Info(fmt.Sprintf("Syncing dev (%s) commands", os.Getenv("DISCORD_DEV_GUILD")))
-		_, err = client.Rest().SetGuildCommands(client.ApplicationID(), snowflake.GetEnv("DISCORD_DEV_GUILD"), commands.Commands)
-		if err != nil {
-			slog.Error(fmt.Sprintf("Failed to sync commands: %s", err))
+	guildID := snowflake.ID(0)
+	if _, exists := os.LookupEnv("PROD"); !exists {
+		guildID = snowflake.GetEnv("DISCORD_DEV_GUILD")
+		if guildID == 0 {
+			log.Fatal("unable to sync commands because environment PROD variable is not present and DISCORD_DEV_GUILD enviroment variable is not set")
 		}
 	}
+
+	commandEnvString := "global"
+	if guildID > 0 {
+		commandEnvString = guildID.String()
+	}
+
+	slog.Info(fmt.Sprintf("Syncing (%s) commands", commandEnvString))
+
+	err = interactions.SyncCommands(client, guildID)
+	if err != nil {
+		slog.Error(fmt.Sprintf("failed to sync (%s) commands: %s", commandEnvString, err))
+	}
+
+	client.AddEventListeners(interactions.Router)
 
 	s := make(chan os.Signal, 1)
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)

@@ -7,25 +7,25 @@ import (
 )
 
 type AccountFlags struct {
-	AutoDailyClaim bool `bson:"autoDailyClaim"`
+	AutoDailyClaim bool `bson:"autoDailyClaim"` // TODO: remove, daily rewards are gone
 }
 
-type EpicAccountEntry struct {
+type EpicAccount struct {
 	AccountID        string    `bson:"accountId"`
+	CreatedClientID  string    `bson:"createdClientId"`
 	RefreshToken     string    `bson:"refreshToken"`
 	RefreshExpiresAt time.Time `bson:"refreshExpiresAt"`
-	ClientId         string    `bson:"clientId"`
-	Flags            UserFlag
+	Flags            UserFlag  `bson:"flags"`
 }
 
-type UserEntry struct {
-	ID              string             `bson:"_id"`
-	DiscordID       snowflake.ID       `bson:"discordId"`
-	Accounts        []EpicAccountEntry `bson:"accounts"`
-	SelectedAccount int                `bson:"selectedAccount"`
-	BulkFlags       UserFlag
-	CreatedAt       time.Time `bson:"createdAt"`
-	UpdatedAt       time.Time `bson:"updatedAt"`
+type User struct {
+	ID                    string        `bson:"_id"`
+	DiscordID             snowflake.ID  `bson:"discordId"`
+	Accounts              []EpicAccount `bson:"accounts"`
+	SelectedEpicAccountId string        `bson:"selectedAccount"`
+	BulkFlags             UserFlag      `bson:"bulkFlags"`
+	CreatedAt             time.Time     `bson:"createdAt"`
+	UpdatedAt             time.Time     `bson:"updatedAt"`
 }
 
 type UserFlag uint32
@@ -42,22 +42,3 @@ const (
 	VIP
 	AUTODAILY
 )
-
-//type EpicAccount struct {
-//	ID                    *models.RecordID `json:"id,omitempty"`
-//	AccountId             string           `json:"account_id"`
-//	CreatedClientId       string           `json:"created_client_id"`
-//	Flags                 int              `json:"flags"`
-//	RefreshToken          string           `json:"refresh_token"`
-//	RefreshTokenExpiresAt time.Time        `json:"refresh_token_expires_at"`
-//}
-//
-//type User struct {
-//	ID        *models.RecordID `json:"id,omitempty"`
-//	CreatedAt time.Time        `json:"created_at"`
-//	DiscordId string           `json:"discord_id"`
-//	//EpicAccounts          []models.RecordID `json:"epic_accounts"`
-//	GlobalFlags           int       `json:"global_flags"`
-//	SelectedEpicAccountId string    `json:"selected_epic_account_id"`
-//	UpdatedAt             time.Time `json:"updated_at"`
-//}
