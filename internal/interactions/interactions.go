@@ -2,6 +2,7 @@ package interactions
 
 import (
 	"github.com/8h9x/BlastBot/database/internal/interactions/accounts"
+	"github.com/8h9x/BlastBot/database/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/database/internal/interactions/login"
 	"github.com/8h9x/BlastBot/database/internal/interactions/logout"
 	"github.com/disgoorg/disgo/bot"
@@ -34,6 +35,14 @@ func init() {
 			{
 				Pattern: "/accounts/switch",
 				Handler: accounts.SwitchHandler,
+			},
+		}...,
+	)
+	RegisterCommand(cloudstorage.Definition,
+		[]Command{
+			{
+				Pattern: "/cloudstorage",
+				Handler: accounts.AddHandler,
 			},
 		}...,
 	)

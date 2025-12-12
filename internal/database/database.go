@@ -29,7 +29,7 @@ func Close() error {
 	return db.Client().Disconnect(context.Background())
 }
 
-func FetchAll[T interface{}](collection string, filter bson.M) ([]T, error) {
+func FetchAll[T any](collection string, filter bson.M) ([]T, error) {
 	col := GetCollection(collection)
 
 	data := make([]T, 0)
@@ -46,7 +46,7 @@ func FetchAll[T interface{}](collection string, filter bson.M) ([]T, error) {
 	return data, nil
 }
 
-func Fetch[T interface{}](collection string, filter bson.M) (T, error) {
+func Fetch[T any](collection string, filter bson.M) (T, error) {
 	col := GetCollection(collection)
 
 	var data T
