@@ -34,19 +34,14 @@ var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 	}
 }
 
-var Go = middleware.GoErr(CommandHandlerErrorRespond)
-
 func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
+	slog.Error("interation handling error:", err.Error())
+
 	embed := discord.NewEmbedBuilder().
 		SetColor(0xFB2C36).
 		SetTimestamp(time.Now()).
 		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
 		SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error())
-
-	// switch err := err.(type) {
-	// case *api.RequestError:
-	// 	embed.SetFooterText(err.Raw.ErrorCode)
-	// }
 
 	event.CreateMessage(discord.NewMessageCreateBuilder().
 		SetEmbeds(embed.
@@ -58,7 +53,7 @@ func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
 
 func init() {
 	Router.Use(Logger)
-	Router.Use(Go)
+	Router.Use(middleware.GoErr(CommandHandlerErrorRespond))
 
 	RegisterCommand(accounts.Definition,
 		[]Command{
