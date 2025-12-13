@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	b, _ := os.ReadFile("./test/ClientSettings.Sav")
+	b, _ := os.ReadFile("./test/ClientSettings_old_raw.Sav")
 
 	fmt.Printf("file size: %d\n", len(b))
 
@@ -42,5 +42,5 @@ func main() {
 
 	fmt.Printf("full uncompressed size: %d\n", len(decompressedData))
 
-	os.WriteFile("./test/dump", decompressedData, 0666)
+	os.WriteFile("./test/dump2", decompressedData, 0666)
 }

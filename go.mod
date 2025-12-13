@@ -3,7 +3,7 @@ module github.com/8h9x/BlastBot/database
 go 1.24.4
 
 require (
-	github.com/8h9x/vinderman v0.0.0-20251211013432-a7e7d21cea95
+	github.com/8h9x/vinderman v0.0.0-20251213152907-98b171104fa5
 	github.com/disgoorg/disgo v0.18.16
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/joho/godotenv v1.5.1

@@ -22,7 +22,7 @@ type User struct {
 	ID                    string        `bson:"_id"`
 	DiscordID             snowflake.ID  `bson:"discordId"`
 	Accounts              []EpicAccount `bson:"accounts"`
-	SelectedEpicAccountId string        `bson:"selectedAccount"`
+	SelectedEpicAccountId string        `bson:"selectedEpicAccountId"`
 	BulkFlags             UserFlag      `bson:"bulkFlags"`
 	CreatedAt             time.Time     `bson:"createdAt"`
 	UpdatedAt             time.Time     `bson:"updatedAt"`

@@ -1,13 +1,19 @@
 package interactions
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/8h9x/BlastBot/database/internal/interactions/accounts"
 	"github.com/8h9x/BlastBot/database/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/database/internal/interactions/login"
 	"github.com/8h9x/BlastBot/database/internal/interactions/logout"
+	"github.com/8h9x/BlastBot/database/internal/interactions/mcp"
+	"github.com/8h9x/BlastBot/database/internal/interactions/mnemonic"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
+	"github.com/disgoorg/disgo/handler/middleware"
 	"github.com/disgoorg/snowflake/v2"
 )
 
@@ -21,7 +27,39 @@ type Command struct {
 	Handler handler.CommandHandler
 }
 
+var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
+	return func(event *handler.InteractionEvent) error {
+		event.Client().Logger().InfoContext(event.Ctx, "handling interaction", slog.Any("interaction", event.Interaction), slog.Any("vars", event.Vars))
+		return next(event)
+	}
+}
+
+var Go = middleware.GoErr(CommandHandlerErrorRespond)
+
+func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
+	embed := discord.NewEmbedBuilder().
+		SetColor(0xFB2C36).
+		SetTimestamp(time.Now()).
+		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+		SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error())
+
+	// switch err := err.(type) {
+	// case *api.RequestError:
+	// 	embed.SetFooterText(err.Raw.ErrorCode)
+	// }
+
+	event.CreateMessage(discord.NewMessageCreateBuilder().
+		SetEmbeds(embed.
+			Build(),
+		).
+		Build(),
+	)
+}
+
 func init() {
+	Router.Use(Logger)
+	Router.Use(Go)
+
 	RegisterCommand(accounts.Definition,
 		[]Command{
 			{
@@ -50,10 +88,26 @@ func init() {
 		Pattern: "/login",
 		Handler: login.Handler,
 	})
+	RegisterCommand(login.SessionCheckDefinition, Command{
+		Pattern: "/sessioncheck",
+		Handler: login.SessionCheckHandler,
+	})
 	RegisterCommand(logout.Definition, Command{
 		Pattern: "/logout",
 		Handler: logout.Handler,
 	})
+	RegisterCommand(mcp.Definition, Command{
+		Pattern: "/mcp",
+		Handler: mcp.Handler,
+	})
+	RegisterCommand(mnemonic.Definition,
+		[]Command{
+			{
+				Pattern: "/mnemonic",
+				Handler: accounts.AddHandler,
+			},
+		}...,
+	)
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {
