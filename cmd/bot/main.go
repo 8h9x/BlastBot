@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/disgoorg/disgo/discord"
 	"log"
 	"log/slog"
 	"os"
@@ -74,6 +75,10 @@ func main() {
 			gateway.WithIntents(
 				gateway.IntentGuilds,
 				gateway.IntentDirectMessages,
+			),
+			gateway.WithPresenceOpts(
+				gateway.WithOnlineStatus(discord.OnlineStatusOnline),
+				gateway.WithCustomActivity("Being the best utility bot"),
 			),
 		),
 		bot.WithEventListenerFunc(func(e *events.Ready) {
