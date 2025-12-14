@@ -98,8 +98,8 @@ func init() {
 	RegisterCommand(mnemonic.Definition,
 		[]Command{
 			{
-				Pattern: "/mnemonic",
-				Handler: accounts.AddHandler,
+				Pattern: "/mnemonic/info",
+				Handler: mnemonic.InfoHandler,
 			},
 		}...,
 	)

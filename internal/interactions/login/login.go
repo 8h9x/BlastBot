@@ -8,9 +8,8 @@ import (
 
 	"github.com/8h9x/BlastBot/database/internal/database"
 	"github.com/8h9x/BlastBot/database/internal/manager/sessions"
-	"github.com/8h9x/vinderman"
-	"github.com/8h9x/vinderman/auth"
-	"github.com/8h9x/vinderman/consts"
+	"github.com/8h9x/fortgo"
+	"github.com/8h9x/fortgo/auth"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -30,7 +29,7 @@ var Definition = discord.SlashCommandCreate{
 func Handler(event *handler.CommandEvent) error {
 	httpClient := &http.Client{}
 
-	clientCredentials, err := auth.Authenticate(httpClient, consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret, auth.PayloadClientCredentials{}, false)
+	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func Handler(event *handler.CommandEvent) error {
 		return err
 	}
 
-	_, err = vinderman.NewClient(httpClient, credentials)
+	_, err = fortgo.NewClient(httpClient, credentials)
 	if err != nil {
 		return err
 	}
@@ -138,7 +137,7 @@ func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interv
 		case <-ctx.Done():
 			return auth.TokenResponse{}, ctx.Err()
 		case <-ticker.C:
-			credentials, err := auth.Authenticate(httpClient, consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret, payload, true)
+			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
 			if err != nil {
 				continue
 			}

@@ -49,8 +49,8 @@ var Definition = discord.SlashCommandCreate{
 }
 
 func Handler(event *handler.CommandEvent) error {
-	data := event.SlashCommandInteractionData()
 	discordId := event.User().ID
+	data := event.SlashCommandInteractionData()
 	operation, profileId, customBodyURL, customBody := data.String("operation"), data.String("profile"), data.Attachment("body").URL, "{}"
 
 	if customBodyURL != "" {
