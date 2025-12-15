@@ -1,4 +1,4 @@
-module github.com/8h9x/BlastBot/database
+module github.com/8h9x/BlastBot
 
 go 1.24.4
 

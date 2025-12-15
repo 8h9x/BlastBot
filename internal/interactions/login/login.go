@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/8h9x/BlastBot/database/internal/database"
-	"github.com/8h9x/BlastBot/database/internal/manager/sessions"
+	"github.com/8h9x/BlastBot/internal/database"
+	"github.com/8h9x/BlastBot/internal/manager/sessions"
 	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/auth"
 	"github.com/disgoorg/disgo/discord"

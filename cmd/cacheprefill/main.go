@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/8h9x/BlastBot/database/pkg/fortniteapicom"
 	"log"
 	"runtime"
 
-	"github.com/8h9x/BlastBot/database/internal/cache"
+	"github.com/8h9x/BlastBot/pkg/fortniteapicom"
+
+	"github.com/8h9x/BlastBot/internal/cache"
 )
 
 func main() {
@@ -24,14 +25,14 @@ func main() {
 	log.Println(cosmetics)
 
 	switch runtime.GOOS {
-    case "linux":
-    case "freebsd":
-        log.Println("Linux/FreeBSD", cache.CACHE_FOLDER_LINUX)
-    case "darwin":
+	case "linux":
+	case "freebsd":
+		log.Println("Linux/FreeBSD", cache.CACHE_FOLDER_LINUX)
+	case "darwin":
 		log.Println("macOS", cache.CACHE_FOLDER_DARWIN)
-    case "windows":
+	case "windows":
 		log.Println("Windows", cache.CACHE_FOLDER_WINDOWS)
-    default:
+	default:
 		log.Println("unknown OS:", runtime.GOOS)
-    }
+	}
 }

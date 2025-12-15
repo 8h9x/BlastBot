@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/8h9x/BlastBot/database/internal/database"
-	"github.com/8h9x/BlastBot/database/internal/interactions"
+	"github.com/disgoorg/disgo/discord"
+
+	"github.com/8h9x/BlastBot/internal/database"
+	"github.com/8h9x/BlastBot/internal/interactions"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"

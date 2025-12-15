@@ -3,7 +3,7 @@ package logout
 import (
 	"context"
 
-	"github.com/8h9x/BlastBot/database/internal/database"
+	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	"go.mongodb.org/mongo-driver/v2/bson"

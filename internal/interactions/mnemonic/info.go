@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/8h9x/BlastBot/database/internal/manager/sessions"
+	"github.com/8h9x/BlastBot/internal/manager/sessions"
 	"github.com/8h9x/fortgo/links"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"

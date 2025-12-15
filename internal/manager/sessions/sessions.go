@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/8h9x/BlastBot/database/internal/database"
+	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/auth"
 	"github.com/disgoorg/snowflake/v2"
