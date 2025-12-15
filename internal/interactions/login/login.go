@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/8h9x/BlastBot/database/internal/database"
@@ -107,13 +108,26 @@ func Handler(event *handler.CommandEvent) error {
 		return err
 	}
 
+	accountInfo, err := session.Accounts.FetchUserByID(session.CurrentCredentials().AccountID)
+	if err != nil {
+		return err
+	}
+
+	avatars, err := session.Avatars.Fetch()
+	if err != nil {
+		return err
+	}
+
+	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatars[0].AvatarID, "ATHENACHARACTER:", "", -1))
+
 	_, err = event.CreateFollowupMessage(discord.NewMessageCreateBuilder().
 		ClearContainerComponents().
 		SetEmbeds(discord.NewEmbedBuilder().
 			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).
+			SetAuthorIcon(avatarURL).
 			SetAuthorNamef("New account saved for %s", event.User().Username).
-			SetDescriptionf("Successfully logged in using client: **%s**\nYou now have (%d/25) saved accounts.", session.ClientID, len(userEntry.Accounts)+1).
+			SetDescriptionf("Successfully logged into **%s**\nYou now have (%d/25) saved accounts.", accountInfo.DisplayName, len(userEntry.Accounts)+1).
 			Build()).
 		Build(),
 	)
