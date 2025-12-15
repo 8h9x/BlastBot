@@ -121,7 +121,7 @@ func Handler(event *handler.CommandEvent) error {
 	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatars[0].AvatarID, "ATHENACHARACTER:", "", -1))
 
 	_, err = event.CreateFollowupMessage(discord.NewMessageCreateBuilder().
-		ClearContainerComponents().
+		// ClearContainerComponents().
 		SetEmbeds(discord.NewEmbedBuilder().
 			SetColor(0xFB5A32).
 			SetTimestamp(time.Now()).

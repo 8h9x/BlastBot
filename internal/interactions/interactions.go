@@ -10,6 +10,7 @@ import (
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
 	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
+	"github.com/8h9x/BlastBot/internal/interactions/test"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -103,6 +104,10 @@ func init() {
 			},
 		}...,
 	)
+	RegisterCommand(test.Definition, Command{
+		Pattern: "/componenttest",
+		Handler: test.Handler,
+	})
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {
