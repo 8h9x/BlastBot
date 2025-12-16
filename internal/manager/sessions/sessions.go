@@ -17,7 +17,9 @@ import (
 var sessions = make(map[string]*fortgo.Client, 0)
 
 func CreateSession(httpClient *http.Client, credentials auth.TokenResponse) (*fortgo.Client, error) {
-	session, err := fortgo.NewClient(&http.Client{}, credentials)
+	session := fortgo.NewClient(&http.Client{}, credentials)
+
+	err := session.Connect()
 	if err != nil {
 		return &fortgo.Client{}, fmt.Errorf("an error occured when creating vinderman client %s", err)
 	}

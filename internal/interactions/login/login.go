@@ -9,7 +9,6 @@ import (
 
 	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/BlastBot/internal/manager/sessions"
-	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/auth"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -48,11 +47,6 @@ func Handler(event *handler.CommandEvent) error {
 	}
 
 	credentials, err := waitForDeviceCodeConfirm(httpClient, deviceAuthorization.DeviceCode, CHECK_INTERVAL, CHECK_TIMEOUT)
-	if err != nil {
-		return err
-	}
-
-	_, err = fortgo.NewClient(httpClient, credentials)
 	if err != nil {
 		return err
 	}
@@ -108,17 +102,17 @@ func Handler(event *handler.CommandEvent) error {
 		return err
 	}
 
-	accountInfo, err := session.Accounts.FetchUserByID(session.CurrentCredentials().AccountID)
+	accountInfo, err := session.AccountService.GetUserByID(session.CurrentCredentials().AccountID)
 	if err != nil {
 		return err
 	}
 
-	avatars, err := session.Avatars.Fetch()
+	avatar, err := session.AvatarService.GetOne(accountInfo.ID)
 	if err != nil {
 		return err
 	}
 
-	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatars[0].AvatarID, "ATHENACHARACTER:", "", -1))
+	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatar.AvatarID, "ATHENACHARACTER:", "", -1))
 
 	_, err = event.CreateFollowupMessage(discord.NewMessageCreateBuilder().
 		// ClearContainerComponents().

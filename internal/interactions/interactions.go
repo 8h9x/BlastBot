@@ -30,7 +30,7 @@ type Command struct {
 
 var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 	return func(event *handler.InteractionEvent) error {
-		event.Client().Logger().InfoContext(event.Ctx, "handling interaction", slog.Any("interaction", event.Interaction), slog.Any("vars", event.Vars))
+		event.Client().Logger.InfoContext(event.Ctx, "handling interaction", slog.Any("interaction", event.Interaction), slog.Any("vars", event.Vars))
 		return next(event)
 	}
 }
@@ -102,6 +102,10 @@ func init() {
 				Pattern: "/mnemonic/info",
 				Handler: mnemonic.InfoHandler,
 			},
+			{
+				Pattern: "/mnemonic/favorites/add",
+				Handler: mnemonic.FavoriteAddHandler,
+			},
 		}...,
 	)
 	RegisterCommand(test.Definition, Command{
@@ -117,14 +121,14 @@ func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {
 	}
 }
 
-func SyncCommands(client bot.Client, guildID snowflake.ID) error {
+func SyncCommands(client *bot.Client, guildID snowflake.ID) error {
 	if guildID.String() == "0" {
-		_, err := client.Rest().SetGlobalCommands(client.ApplicationID(), definitions)
+		_, err := client.Rest.SetGlobalCommands(client.ApplicationID, definitions)
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err := client.Rest().SetGuildCommands(client.ApplicationID(), guildID, definitions)
+		_, err := client.Rest.SetGuildCommands(client.ApplicationID, guildID, definitions)
 		if err != nil {
 			return err
 		}

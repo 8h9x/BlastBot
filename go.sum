@@ -1,5 +1,9 @@
 github.com/8h9x/fortgo v0.0.0-20251215001051-2ee5c1908234 h1:70BEmJlgSQ1IhIjqHMrmdPhjWNtfFAWjx2JxG8V4G7E=
 github.com/8h9x/fortgo v0.0.0-20251215001051-2ee5c1908234/go.mod h1:4gLei18j4icUaBFszN04ng47Tv9vDE9xYAWZiykKX/M=
+github.com/8h9x/fortgo v0.0.0-20251216200409-679da49e3e4f h1:bD1hKEra7M9TjvIqV9CAtGspL6kuaQDEL1of8W3qw4o=
+github.com/8h9x/fortgo v0.0.0-20251216200409-679da49e3e4f/go.mod h1:4gLei18j4icUaBFszN04ng47Tv9vDE9xYAWZiykKX/M=
+github.com/8h9x/fortgo v0.0.0-20251216200744-f1aaa9b75c36 h1:GI/4voRhLfc13BHi1Bx9uPfGYTkxjwqztmfFNZJQ65w=
+github.com/8h9x/fortgo v0.0.0-20251216200744-f1aaa9b75c36/go.mod h1:4gLei18j4icUaBFszN04ng47Tv9vDE9xYAWZiykKX/M=
 github.com/8h9x/vinderman v0.0.0-20251213152907-98b171104fa5 h1:98ymcfu8KM0k8WuFe6cKL9HRbYoa+GaYNyoQQJf3hP0=
 github.com/8h9x/vinderman v0.0.0-20251213152907-98b171104fa5/go.mod h1:3ofSXAkz2P/X/PQCWm0jo8nz0gHho7CyxIov4ooNCUI=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
