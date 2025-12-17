@@ -15,7 +15,7 @@ func main() {
 	flag.BoolVar(&purgeCache, "purge", false, "Delete existing cache and redownload all images from server")
 	flag.Parse()
 
-	log.Println(purgeCache)
+	log.Println(purgeCache)	
 
 	cosmetics, err := fortniteapicom.FetchCosmetics()
 	if err != nil {

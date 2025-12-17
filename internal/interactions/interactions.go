@@ -6,6 +6,7 @@ import (
 
 	"github.com/8h9x/BlastBot/internal/interactions/accounts"
 	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
+	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
@@ -80,6 +81,10 @@ func init() {
 			},
 		}...,
 	)
+	RegisterCommand(launch.Definition, Command{
+		Pattern: "/launch",
+		Handler: launch.Handler,
+	})
 	RegisterCommand(login.Definition, Command{
 		Pattern: "/login",
 		Handler: login.Handler,

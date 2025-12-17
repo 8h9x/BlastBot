@@ -2,6 +2,8 @@ package login
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,8 +12,10 @@ import (
 	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/BlastBot/internal/manager/sessions"
 	"github.com/8h9x/fortgo/auth"
+	"github.com/8h9x/fortgo/consts"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
+	"gitlab.com/8h9x/Vinderman/eos"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -28,25 +32,50 @@ var Definition = discord.SlashCommandCreate{
 
 func Handler(event *handler.CommandEvent) error {
 	httpClient := &http.Client{}
+	eosClient := &eos.Client{httpClient}
 
-	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
+//	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
+	clientCredentials, err := eosClient.GetClientCredentials(consts.UEFNClientID, consts.UEFNClientSecret)
 	if err != nil {
 		return err
 	}
 
-	deviceAuthorization, err := auth.GetDeviceCode(httpClient, clientCredentials)
+//	deviceAuthorization, err := auth.GetDeviceCode(httpClient, clientCredentials)
+	deviceAuthorization, err := eosClient.GetDeviceCode(clientCredentials)
 	if err != nil {
 		return err
 	}
 
 	err = event.CreateMessage(discord.MessageCreate{
-		Content: fmt.Sprintf("Visit this URL: %s\nThen press 'Confirm' on the epic games login page.\n", deviceAuthorization.VerificationURIComplete),
+		Content: fmt.Sprintf("Visit this URL: %s\nThen press 'Confirm' on the epic games login page.\n", deviceAuthorization.VerificationUriComplete),
 	})
 	if err != nil {
 		return err
 	}
 
-	credentials, err := waitForDeviceCodeConfirm(httpClient, deviceAuthorization.DeviceCode, CHECK_INTERVAL, CHECK_TIMEOUT)
+	deviceCodeCredentials, err := waitForDeviceCodeConfirmEOS(eosClient, consts.UEFNClientID, consts.UEFNClientSecret, deviceAuthorization.DeviceCode, CHECK_INTERVAL, CHECK_TIMEOUT)
+	if err != nil {
+		return err
+	}
+
+	exchangeCode, err := eosClient.GetExchangeCode(deviceCodeCredentials)
+	if err != nil {
+		return err
+	}
+
+	exchangeCredentials, err := eosClient.ExchangeCodeLogin(consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret, exchangeCode.Code)
+	if err != nil {
+		return err
+	}
+
+	decodedRefreshJWTPayload, err := base64.RawURLEncoding.DecodeString(strings.Split(exchangeCredentials.RefreshToken, ".")[1])
+	if err != nil {
+		return err
+	}
+
+	refreshPayload := DecodedRefreshTokenJwtPayload{}
+
+	err = json.Unmarshal(decodedRefreshJWTPayload, &refreshPayload)
 	if err != nil {
 		return err
 	}
@@ -58,14 +87,14 @@ func Handler(event *handler.CommandEvent) error {
 		DiscordID: userId,
 		Accounts: []database.EpicAccount{
 			{
-				AccountID:        credentials.AccountID,
-				RefreshToken:     credentials.RefreshToken,
-				RefreshExpiresAt: credentials.RefreshExpiresAt,
-				CreatedClientID:  credentials.ClientID,
+				AccountID:        exchangeCredentials.AccountID,
+				RefreshToken:     refreshPayload.JTI,
+				RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
+				CreatedClientID:  consts.FortnitePCClientID,
 				Flags:            database.USER,
 			},
 		},
-		SelectedEpicAccountId: credentials.AccountID,
+		SelectedEpicAccountId: exchangeCredentials.AccountID,
 		BulkFlags:             database.USER,
 		CreatedAt:             time.Now(),
 		UpdatedAt:             time.Now(),
@@ -76,17 +105,17 @@ func Handler(event *handler.CommandEvent) error {
 	_, err = database.Fetch[database.User]("users", bson.M{"discordId": userId})
 	if err == nil { // user exists
 		_, err := col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$push": bson.M{"accounts": bson.M{
-			"accountId":        credentials.AccountID,
-			"refreshToken":     credentials.RefreshToken,
-			"refreshExpiresAt": credentials.RefreshExpiresAt,
-			"clientId":         credentials.ClientID,
+			"accountId":        exchangeCredentials.AccountID,
+			"refreshToken":     refreshPayload.JTI,
+			"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
+			"clientId":         consts.FortnitePCClientID,
 			"flags":            database.USER,
 		}}}, options.UpdateOne().SetUpsert(true))
 		if err != nil {
 			return err
 		}
 
-		_, err = col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$set": bson.M{"selectedEpicAccountId": credentials.AccountID}})
+		_, err = col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$set": bson.M{"selectedEpicAccountId": exchangeCredentials.AccountID}})
 		if err != nil {
 			return err
 		}
@@ -97,7 +126,12 @@ func Handler(event *handler.CommandEvent) error {
 		}
 	}
 
-	session, err := sessions.CreateSession(httpClient, credentials)
+	refreshCredentials, err := auth.Authenticate(httpClient, &auth.AuthClient{consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret}, auth.PayloadRefreshToken{refreshPayload.JTI}, false)
+	if err != nil {
+		return err
+	}
+
+	session, err := sessions.CreateSession(httpClient, refreshCredentials)
 	if err != nil {
 		return err
 	}
@@ -129,6 +163,29 @@ func Handler(event *handler.CommandEvent) error {
 	return err
 }
 
+func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret string, deviceCode string, interval, timeout time.Duration) (eos.UserCredentials, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return eos.UserCredentials{}, ctx.Err()
+		case <-ticker.C:
+//			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
+			credentials, err := c.DeviceCodeLogin(clientID, clientSecret, deviceCode)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			return credentials, nil
+		}
+	}
+}
+
 func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interval, timeout time.Duration) (auth.TokenResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -152,4 +209,18 @@ func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interv
 			return credentials, nil
 		}
 	}
+}
+
+type DecodedRefreshTokenJwtPayload struct {
+    AUD   string `json:"aud"`
+    SUB   string `json:"sub"`
+    T     string `json:"t"`
+    AppID string `json:"appid"`
+    Scope string `json:"scope"`
+    ISS   string `json:"iss"`
+    DN    string `json:"dn"`
+    EXP   int    `json:"exp"`
+    IAT   int    `json:"iat"`
+    JTI   string `json:"jti"`
+    Pfpid string `json:"pfpid"`
 }

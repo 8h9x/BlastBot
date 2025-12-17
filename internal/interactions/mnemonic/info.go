@@ -3,6 +3,7 @@ package mnemonic
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/manager/sessions"
@@ -14,7 +15,7 @@ import (
 func InfoHandler(event *handler.CommandEvent) error {
 	discordId := event.User().ID
 	data := event.SlashCommandInteractionData()
-	mnemonic := data.String("mnemonic")
+	mnemonic := strings.ToLower(data.String("mnemonic"))
 
 	session, err := sessions.GetSessionForUser(discordId)
 	if err != nil {
@@ -37,21 +38,12 @@ func InfoHandler(event *handler.CommandEvent) error {
 		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
 		SetDescriptionf("```json\n%s\n```", mnemonicDataRaw)
 
-	event.CreateMessage(discord.NewMessageCreateBuilder().
+	err = event.CreateMessage(discord.NewMessageCreateBuilder().
 		SetEmbeds(embed.
 			Build(),
 		).
 		Build(),
 	)
-
-	me, err := session.FetchMe()
-	if err != nil {
-		return fmt.Errorf("unable to fetch me: %s", err)
-	}
-
-	err = event.CreateMessage(discord.MessageCreate{
-		Content: fmt.Sprintf("session using client: %s exists for account: %s, discord user: %s", session.ClientID, me.ID, event.User().ID.String()),
-	})
 	if err != nil {
 		return err
 	}
