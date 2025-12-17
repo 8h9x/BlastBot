@@ -11,6 +11,7 @@ import (
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
 	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
+	"github.com/8h9x/BlastBot/internal/interactions/redeem"
 	"github.com/8h9x/BlastBot/internal/interactions/test"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -113,6 +114,10 @@ func init() {
 			},
 		}...,
 	)
+	RegisterCommand(redeem.Definition, Command{
+		Pattern: "/redeem",
+		Handler: redeem.Handler,
+	})
 	RegisterCommand(test.Definition, Command{
 		Pattern: "/componenttest",
 		Handler: test.Handler,
