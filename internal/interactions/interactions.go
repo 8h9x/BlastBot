@@ -5,14 +5,16 @@ import (
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/interactions/accounts"
-	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
+	"github.com/8h9x/BlastBot/internal/interactions/claim"
+//	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
-	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
-	"github.com/8h9x/BlastBot/internal/interactions/redeem"
-	"github.com/8h9x/BlastBot/internal/interactions/test"
+//	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
+//	"github.com/8h9x/BlastBot/internal/interactions/redeem"
+//	"github.com/8h9x/BlastBot/internal/interactions/showtoken"
+//	"github.com/8h9x/BlastBot/internal/interactions/test"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -74,14 +76,18 @@ func init() {
 			},
 		}...,
 	)
-	RegisterCommand(cloudstorage.Definition,
-		[]Command{
-			{
-				Pattern: "/cloudstorage",
-				Handler: accounts.AddHandler,
-			},
-		}...,
-	)
+	RegisterCommand(claim.Definition, Command{
+		Pattern: "/claim",
+		Handler: claim.Handler,
+	})
+//	RegisterCommand(cloudstorage.Definition,
+//		[]Command{
+//			{
+//				Pattern: "/cloudstorage",
+//				Handler: accounts.AddHandler,
+//			},
+//		}...,
+//	)
 	RegisterCommand(launch.Definition, Command{
 		Pattern: "/launch",
 		Handler: launch.Handler,
@@ -102,26 +108,30 @@ func init() {
 		Pattern: "/mcp",
 		Handler: mcp.Handler,
 	})
-	RegisterCommand(mnemonic.Definition,
-		[]Command{
-			{
-				Pattern: "/mnemonic/info",
-				Handler: mnemonic.InfoHandler,
-			},
-			{
-				Pattern: "/mnemonic/favorites/add",
-				Handler: mnemonic.FavoriteAddHandler,
-			},
-		}...,
-	)
-	RegisterCommand(redeem.Definition, Command{
-		Pattern: "/redeem",
-		Handler: redeem.Handler,
-	})
-	RegisterCommand(test.Definition, Command{
-		Pattern: "/componenttest",
-		Handler: test.Handler,
-	})
+//	RegisterCommand(mnemonic.Definition,
+//		[]Command{
+//			{
+//				Pattern: "/mnemonic/info",
+//				Handler: mnemonic.InfoHandler,
+//			},
+//			{
+//				Pattern: "/mnemonic/favorites/add",
+//				Handler: mnemonic.FavoriteAddHandler,
+//			},
+//		}...,
+//	)
+//	RegisterCommand(redeem.Definition, Command{
+//		Pattern: "/redeem",
+//		Handler: redeem.Handler,
+//	})
+//	RegisterCommand(showtoken.Definition, Command{
+//		Pattern: "/showtoken",
+//		Handler: showtoken.Handler,
+//	})
+//	RegisterCommand(test.Definition, Command{
+//		Pattern: "/componenttest",
+//		Handler: test.Handler,
+//	})
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {

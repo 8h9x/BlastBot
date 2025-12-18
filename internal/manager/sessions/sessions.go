@@ -51,7 +51,7 @@ func GetSessionForUser(discordId snowflake.ID) (*fortgo.Client, error) {
 
 		credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadRefreshToken{
 			RefreshToken: activeAccount.RefreshToken,
-		}, true)
+		}, false)
 		if err != nil {
 			return &fortgo.Client{}, fmt.Errorf("unable to generate credentials using saved refresh token: %s", err)
 		}
