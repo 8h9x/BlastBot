@@ -6,10 +6,6 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-type AccountFlags struct {
-	AutoDailyClaim bool `bson:"autoDailyClaim"` // TODO: remove, daily rewards are gone
-}
-
 type EpicAccount struct {
 	AccountID        string    `bson:"accountId"`
 	CreatedClientID  string    `bson:"createdClientId"`
@@ -40,5 +36,5 @@ const (
 	DEVELOPER
 	BETA
 	VIP
-	AUTODAILY
+	AUTOWINTERFEST
 )

@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/interactions/accounts"
-	"github.com/8h9x/BlastBot/internal/interactions/claim"
+	"github.com/8h9x/BlastBot/internal/interactions/auto"
+//	"github.com/8h9x/BlastBot/internal/interactions/claim"
 //	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
@@ -15,6 +16,7 @@ import (
 //	"github.com/8h9x/BlastBot/internal/interactions/redeem"
 //	"github.com/8h9x/BlastBot/internal/interactions/showtoken"
 //	"github.com/8h9x/BlastBot/internal/interactions/test"
+	"github.com/8h9x/BlastBot/internal/interactions/winterfest"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -76,10 +78,14 @@ func init() {
 			},
 		}...,
 	)
-	RegisterCommand(claim.Definition, Command{
-		Pattern: "/claim",
-		Handler: claim.Handler,
-	})
+	RegisterCommand(auto.Definition,
+		[]Command{
+			{
+				Pattern: "/auto/winterfest",
+				Handler: auto.WinterfestHandler,
+			},
+		}...,
+	)
 //	RegisterCommand(cloudstorage.Definition,
 //		[]Command{
 //			{
@@ -132,6 +138,10 @@ func init() {
 //		Pattern: "/componenttest",
 //		Handler: test.Handler,
 //	})
+	RegisterCommand(winterfest.Definition, Command{
+		Pattern: "/winterfest",
+		Handler: winterfest.Handler,
+	})
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {
