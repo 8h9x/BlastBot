@@ -4,6 +4,10 @@ github.com/8h9x/fortgo v0.0.0-20251218055022-32dc49125ccd h1:RS6i1uUh9vW+F0WMDbl
 github.com/8h9x/fortgo v0.0.0-20251218055022-32dc49125ccd/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/8h9x/fortgo v0.0.0-20251219190259-e9ce6d172d9a h1:xDtnHi8zGpDmyP8+W7PIkBHvIxKCb+2qL4H6FNnLuCE=
 github.com/8h9x/fortgo v0.0.0-20251219190259-e9ce6d172d9a/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
+github.com/8h9x/fortgo v0.0.0-20251220013508-17086405c594 h1:xx6QyqVK6Aly7QwNxJPbfYSZaftUlpAAMx3k5N0O9po=
+github.com/8h9x/fortgo v0.0.0-20251220013508-17086405c594/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
+github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723 h1:m1Dgov1wVO+ySKGKrJbyJ/6CqaDelXZCbDOqo+9kUXI=
+github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/disgoorg/disgo v0.19.0-rc.12.0.20251211114218-62e9632d6581 h1:QFNE6V91wgB3phPAS4LITEPSjWApmi6ifa7CDrsZIQ0=

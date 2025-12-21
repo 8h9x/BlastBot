@@ -6,5 +6,5 @@ type FString struct {
 }
 
 func (f *FString) String() string {
-	return ""
+	return string(f.Bytes)
 }

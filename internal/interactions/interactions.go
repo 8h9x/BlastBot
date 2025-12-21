@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"github.com/8h9x/fortgo/request"
 	"log/slog"
 	"time"
 
@@ -42,7 +43,14 @@ var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 }
 
 func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
-	slog.Error("interation handling error:", err.Error())
+	slog.Error("interation handling error:", err.(request.Error).Raw)
+
+	switch e := err.(type) {
+	case request.Error:
+		slog.Error("interation handling error:", e.Raw)
+	default:
+		slog.Error("interation handling error:", e.Error())
+	}
 
 	embed := discord.NewEmbedBuilder().
 		SetColor(0xFB2C36).

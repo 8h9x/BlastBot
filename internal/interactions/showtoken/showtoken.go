@@ -1,14 +1,14 @@
 package showtoken
 
 import (
-	"fmt"
-	"time"
+    "fmt"
+    "time"
 
-	"github.com/8h9x/BlastBot/internal/manager/sessions"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/handler"
-	"github.com/8h9x/fortgo/auth"
-//	"github.com/8h9x/fortgo/consts"
+    "github.com/8h9x/BlastBot/internal/sessions"
+    "github.com/8h9x/fortgo/auth"
+    "github.com/disgoorg/disgo/discord"
+    "github.com/disgoorg/disgo/handler"
+    //	"github.com/8h9x/fortgo/consts"
 )
 
 var Definition = discord.SlashCommandCreate{

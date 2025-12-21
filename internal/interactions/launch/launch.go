@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/8h9x/BlastBot/internal/manager/sessions"
+    "github.com/8h9x/BlastBot/internal/sessions"
 	"github.com/8h9x/fortgo/auth"
 	"github.com/8h9x/fortgo/consts"
 	"github.com/disgoorg/disgo/discord"

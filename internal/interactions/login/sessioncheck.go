@@ -3,7 +3,7 @@ package login
 import (
 	"fmt"
 
-	"github.com/8h9x/BlastBot/internal/manager/sessions"
+    "github.com/8h9x/BlastBot/internal/sessions"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )

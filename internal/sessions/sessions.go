@@ -21,7 +21,7 @@ func CreateSession(httpClient *http.Client, credentials auth.TokenResponse) (*fo
 
 	err := session.Connect()
 	if err != nil {
-		return &fortgo.Client{}, fmt.Errorf("an error occured when creating vinderman client %s", err)
+		return &fortgo.Client{}, fmt.Errorf("an error occured when creating fortgo client %s", err)
 	}
 
 	sessions[credentials.AccountID] = session

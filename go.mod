@@ -3,7 +3,7 @@ module github.com/8h9x/BlastBot
 go 1.24.4
 
 require (
-	github.com/8h9x/fortgo v0.0.0-20251219190259-e9ce6d172d9a
+	github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723
 	github.com/disgoorg/disgo v0.19.0-rc.12.0.20251211114218-62e9632d6581
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/joho/godotenv v1.5.1
