@@ -1,7 +1,6 @@
 package interactions
 
 import (
-	"github.com/8h9x/fortgo/request"
 	"log/slog"
 	"time"
 
@@ -18,6 +17,7 @@ import (
 //	"github.com/8h9x/BlastBot/internal/interactions/showtoken"
 //	"github.com/8h9x/BlastBot/internal/interactions/test"
 	"github.com/8h9x/BlastBot/internal/interactions/winterfest"
+	"github.com/8h9x/fortgo/request"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -37,14 +37,23 @@ type Command struct {
 
 var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 	return func(event *handler.InteractionEvent) error {
+//		err := event.DeferCreateMessage(false)
+//		if err != nil {
+//			return err
+//		}
+
+//		err := event.LaunchActivity()
+//		if err != nil {
+//			return err
+//		}
+
 		event.Client().Logger.InfoContext(event.Ctx, "handling interaction", slog.Any("interaction", event.Interaction), slog.Any("vars", event.Vars))
+
 		return next(event)
 	}
 }
 
 func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
-	slog.Error("interation handling error:", err.(request.Error).Raw)
-
 	switch e := err.(type) {
 	case request.Error:
 		slog.Error("interation handling error:", e.Raw)

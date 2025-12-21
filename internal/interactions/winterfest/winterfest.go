@@ -72,6 +72,20 @@ var Definition = discord.SlashCommandCreate{
 	Description: "Command to send kitchen sink component message for feature testing",
 }
 
+func Setup(router *handler.Mux) {
+	router.Command("/winterfest", func(event *handler.CommandEvent) error {
+		return nil
+	})
+
+	router.Component("/winterfest-cabin-prev", func(e *handler.ComponentEvent) error {
+		return nil
+	})
+
+	router.Component("/winterfest-cabin-next", func(e *handler.ComponentEvent) error {
+		return nil
+	})
+}
+
 func Handler(event *handler.CommandEvent) error {
 	err := event.CreateMessage(discord.MessageCreate{
 		Flags: discord.MessageFlagIsComponentsV2,
@@ -105,23 +119,12 @@ func Handler(event *handler.CommandEvent) error {
 				),
 				discord.NewLargeSeparator(),
 				discord.NewActionRow(
-					discord.NewButton(discord.ButtonStyleSecondary, "", "winterfest-cabin-prev", "", 0).
+					discord.NewPrimaryButton("", "/winterfest-cabin-prev").
 						WithEmoji(discord.NewCustomComponentEmoji(1451208271984722073)),
-					discord.NewButton(discord.ButtonStylePrimary, "1 / 7", "winterfest-cabin-page-num", "", 0),
-					discord.NewButton(discord.ButtonStyleSecondary, "", "winterfest-cabin-next", "", 0).
+					discord.NewSecondaryButton("1 / 7", "/winterfest-cabin-page-num"),
+					discord.NewPrimaryButton("", "/winterfest-cabin-next").
 						WithEmoji(discord.NewCustomComponentEmoji(1451208303370702941)),
 				),
-//				discord.SectionComponent{
-//					Components: []discord.SectionSubComponent{
-//						discord.NewTextDisplay("### Iconic Kim Kardashian "),
-//						discord.NewTextDisplay("OUTFIT\n`ERG.Node.A.3`"),
-//					},
-//					Accessory: discord.NewThumbnail("https://fortnite-api.com/images/cosmetics/br/Character_QuicheLorraineLime/icon.png"),
-//				},
-//				discord.NewActionRow(
-//					discord.NewButton(discord.ButtonStyleSuccess, "Open", "next-seecetidon", "", 0).
-//						WithEmoji(discord.NewCustomComponentEmoji(1451205113669484655)),
-//				),
 			),
 		},
 	})

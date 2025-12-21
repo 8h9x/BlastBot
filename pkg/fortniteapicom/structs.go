@@ -2,7 +2,7 @@ package fortniteapicom
 
 import "time"
 
-type Cosmetics map[string]CosmeticItem
+//type Cosmetics map[string]CosmeticItem
 
 type CosmeticListResponse struct {
     Status int `json:"status"`
@@ -58,4 +58,9 @@ type CosmeticItem struct {
     Path                string      `json:"path"`
     Added               time.Time   `json:"added"`
     ShopHistory         interface{} `json:"shopHistory"`
+}
+
+type CosmeticSearchResponse struct {
+    Status int `json:"status"`
+    Data   CosmeticItem
 }

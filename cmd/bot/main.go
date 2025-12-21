@@ -114,6 +114,8 @@ func main() {
 		slog.Error(fmt.Sprintf("failed to sync (%s) commands: %s", commandEnvString, err))
 	}
 
+	slog.Info(fmt.Sprintf("Finished syncing (%s) commands", commandEnvString))
+
 	client.AddEventListeners(interactions.Router)
 
 	s := make(chan os.Signal, 1)
