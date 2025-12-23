@@ -2,7 +2,6 @@ package launch
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
     "github.com/8h9x/BlastBot/internal/sessions"
@@ -18,6 +17,11 @@ var Definition = discord.SlashCommandCreate{
 }
 
 func Handler(event *handler.CommandEvent) error {
+	err := event.DeferCreateMessage(true)
+	if err != nil {
+		return err
+	}
+
 	discordId := event.User().ID
 
 	session, err := sessions.GetSessionForUser(discordId)
@@ -29,13 +33,6 @@ func Handler(event *handler.CommandEvent) error {
 	if err != nil {
 		return fmt.Errorf("unable to fetch me: %s", err)
 	}
-
-	avatar, err := session.AvatarService.GetOne(me.ID)
-    if err != nil {
-        return err
-    }
-
-	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatar.AvatarID, "ATHENACHARACTER:", "", -1))
 
 	exchange, err := session.GetExchangeCode()
     if err != nil {
@@ -52,19 +49,17 @@ func Handler(event *handler.CommandEvent) error {
         return err
     }
 
-    embed := discord.NewEmbedBuilder().
-        SetAuthorIcon(avatarURL).
-        SetColor(0xFB5A32).
-        SetTimestamp(time.Now()).
-        SetAuthorNamef("Launch Fortnite on Windows as %s", me.DisplayName).
-        SetTitle("Type or paste the following text into a Windows Command Prompt (cmd.exe) and press `Enter`. Expires in 5 minutes.").
-        SetDescriptionf("```powershell\nstart /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s\n```", launcherExchange.Code, exchangeCredentials.AccountID).
-        Build()
-
-	err = event.CreateMessage(discord.NewMessageCreateBuilder().SetEphemeral(true).SetEmbeds(embed).Build())
-	if err != nil {
-		return err
-	}
-
-	return nil
+	flags := discord.MessageFlagIsComponentsV2
+	_, err = event.UpdateInteractionResponse(discord.MessageUpdate{
+		Flags: &flags,
+		Components: &[]discord.LayoutComponent{
+			discord.NewContainer(
+				discord.NewTextDisplayf("## Launch Fortnite on Windows as %s", me.DisplayName),
+				discord.NewTextDisplay("Type or paste the following text into a Windows Command Prompt (cmd.exe) and press `Enter`."),
+				discord.NewTextDisplayf("```powershell\nstart /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s\n```", launcherExchange.Code, exchangeCredentials.AccountID),
+				discord.NewTextDisplayf("Expires <t:%d:R>", time.Now().Add(5 * time.Minute).Unix()),
+			),
+		},
+	});
+	return err
 }
