@@ -100,7 +100,3 @@ func main() {
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)
 	<-s
 }
-
-func dummyCommand(e *handler.CommandEvent) error {
-	return nil
-}
