@@ -4,14 +4,14 @@ import "github.com/disgoorg/disgo/discord"
 
 var opts = []discord.ApplicationCommandOption{
 	discord.ApplicationCommandOptionString{
-		Name:        "mnemonic",
+		Name:        "playlist",
 		Description: "Playlist id or creative map code.",
 		Required:    true,
 	},
 }
 
 var Definition = discord.SlashCommandCreate{
-	Name:        "mnemonic",
+	Name:        "playlist",
 	Description: "Mnemonic related commands.",
 	Options: []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionSubCommandGroup{
@@ -20,7 +20,7 @@ var Definition = discord.SlashCommandCreate{
 			Options: []discord.ApplicationCommandOptionSubCommand{
 				{
 					Name:        "add",
-					Description: "Adds a mnemonic to your favorites list.",
+					Description: "Adds a playlist to your favorites list.",
 					Options:     opts,
 				},
 				{
@@ -29,14 +29,14 @@ var Definition = discord.SlashCommandCreate{
 				},
 				{
 					Name:        "remove",
-					Description: "Removes a mnemonic from your favorites list.",
+					Description: "Removes a playlist from your favorites list.",
 					Options:     opts,
 				},
 			},
 		},
 		discord.ApplicationCommandOptionSubCommand{
 			Name:        "info",
-			Description: "Returns information about a mnemonic.",
+			Description: "Returns information about a playlist.",
 			Options:     opts,
 		},
 	},

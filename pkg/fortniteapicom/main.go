@@ -105,6 +105,10 @@ func (c *Client) PreloadCache() error {
     return nil
 }
 
+func (c *Client) GetCosmetics() map[string]CosmeticItem {
+    return c.cosmetics
+}
+
 func (c *Client) GetCosmeticByID(id string) (CosmeticItem, error) {
     lowerID := strings.ToLower(id)
 

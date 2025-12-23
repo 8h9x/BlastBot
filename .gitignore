@@ -1,3 +1,6 @@
 .idea
 .env
 tmp
+
+# not done
+internal/database/schema.sql

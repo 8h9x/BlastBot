@@ -58,7 +58,7 @@ func Handler(event *handler.CommandEvent) error {
         SetTimestamp(time.Now()).
         SetAuthorNamef("Launch Fortnite on Windows as %s", me.DisplayName).
         SetTitle("Type or paste the following text into a Windows Command Prompt (cmd.exe) and press `Enter`. Expires in 5 minutes.").
-        SetDescriptionf("```start /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s```", launcherExchange.Code, exchangeCredentials.AccountID).
+        SetDescriptionf("```powershell\nstart /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s\n```", launcherExchange.Code, exchangeCredentials.AccountID).
         Build()
 
 	err = event.CreateMessage(discord.NewMessageCreateBuilder().SetEphemeral(true).SetEmbeds(embed).Build())

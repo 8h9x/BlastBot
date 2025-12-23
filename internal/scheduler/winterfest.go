@@ -3,6 +3,7 @@ package scheduler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/robfig/cron"
 	"log"
 	"strings"
 	"time"
@@ -39,11 +40,16 @@ type TokenItemAttributes struct {
 }
 
 type WinterfestGiftService struct{
+	cron cron.Cron
 	RewardGraphTemplateID string
 }
 
-func (s *WinterfestGiftService) Start() {
-    log.Println("Starting WinterfestGiftService gift opening loop...") // TODO: discord channel alert
+func (s *WinterfestGiftService) Register() error {
+	return s.cron.AddFunc("0 30 * * * *", func() { s.Tick() })
+}
+
+func (s *WinterfestGiftService) Tick() {
+	log.Println("Starting WinterfestGiftService gift opening loop...") // TODO: discord channel alert
 
 	mockSessions := []fortgo.Client{}
 
