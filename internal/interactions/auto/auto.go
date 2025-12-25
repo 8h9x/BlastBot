@@ -18,7 +18,7 @@ var Definition = discord.SlashCommandCreate{
 	Options: []discord.ApplicationCommandOption{
 		discord.ApplicationCommandOptionSubCommand{
 			Name:        "winterfest",
-			Description: "Automatically open winterfest gifts each day..",
+			Description: "Automatically open winterfest gifts each day.",
 			Options: sharedOpts,
 		},
 	},
