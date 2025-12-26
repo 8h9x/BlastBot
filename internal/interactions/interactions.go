@@ -8,6 +8,7 @@ import (
 	"github.com/8h9x/BlastBot/internal/interactions/auto"
 //	"github.com/8h9x/BlastBot/internal/interactions/claim"
 //	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
+	"github.com/8h9x/BlastBot/internal/interactions/cosmetic"
 	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
@@ -111,6 +112,10 @@ func init() {
 //			},
 //		}...,
 //	)
+	RegisterCommand(cosmetic.Definition, Command{
+		Pattern: "/cosmetic",
+		Handler: cosmetic.Handler,
+	})
 	RegisterCommand(launch.Definition, Command{
 		Pattern: "/launch",
 		Handler: launch.Handler,
