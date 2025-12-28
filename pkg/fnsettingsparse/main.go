@@ -9,10 +9,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
-	b, _ := os.ReadFile("./test/ClientSettings_old_raw.Sav")
+	b, _ := os.ReadFile("./test/ClientSettings.Sav")
 
 	fmt.Printf("file size: %d\n", len(b))
 
@@ -42,5 +43,51 @@ func main() {
 
 	fmt.Printf("full uncompressed size: %d\n", len(decompressedData))
 
-	os.WriteFile("./test/dump2", decompressedData, 0666)
+	startParsing(decompressedData)
+
+	// os.WriteFile("./test/dump2", decompressedData, 0666)
+}
+
+func readUEString(r *bytes.Reader) string {
+	var length int32
+	binary.Read(r, binary.LittleEndian, &length)
+
+	if length == 0 {
+		return ""
+	}
+
+	isUnicode := length < 0
+	if isUnicode {
+		length = -length * 2
+	}
+
+	buf := make([]byte, length)
+	r.Read(buf)
+	return strings.TrimRight(string(buf), "\x00")
+}
+
+func startParsing(data []byte) {
+	reader := bytes.NewReader(data)
+
+	reader.Seek(50, io.SeekStart)
+
+	fmt.Println("--- Starting Property Dump ---")
+	for i := 0; i < 10; i++ {
+		propName := readUEString(reader)
+		if propName == "None" || propName == "" {
+			break
+		}
+
+		propType := readUEString(reader)
+
+		var propSize int32
+		binary.Read(reader, binary.LittleEndian, &propSize)
+
+		var index int32
+		binary.Read(reader, binary.LittleEndian, &index)
+
+		fmt.Printf("Property: %s | Type: %s | Data Size: %d bytes\n", propName, propType, propSize)
+
+		reader.Seek(int64(propSize)+1, io.SeekCurrent)
+	}
 }

@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-//	"database/sql"
+
+	//	"database/sql"
 	"fmt"
 	"log"
 	"log/slog"
@@ -32,17 +33,16 @@ func main() {
 		}
 	}
 
+	//	url := fmt.Sprintf("%s?authToken=%s", os.Getenv("TURSO_DATABASE_URL"), os.Getenv("TURSO_AUTH_TOKEN"))
 
-//	url := fmt.Sprintf("%s?authToken=%s", os.Getenv("TURSO_DATABASE_URL"), os.Getenv("TURSO_AUTH_TOKEN"))
-
-//	db, err := sql.Open("libsql", url)
-//	if err != nil {
-//		fmt.Fprintf(os.Stderr, "failed to open db %s: %s", url, err)
-//		os.Exit(1)
-//	}
-//  	defer db.Close()
-//
-//	log.Println(db.Stats().MaxOpenConnections)
+	//	db, err := sql.Open("libsql", url)
+	//	if err != nil {
+	//		fmt.Fprintf(os.Stderr, "failed to open db %s: %s", url, err)
+	//		os.Exit(1)
+	//	}
+	//  	defer db.Close()
+	//
+	//	log.Println(db.Stats().MaxOpenConnections)
 
 	if err := database.Init(os.Getenv("MONGODB_URI"), "blast"); err != nil {
 		slog.Error(fmt.Sprintf("error while connecting to database: %s", err))
@@ -56,7 +56,7 @@ func main() {
 			),
 			gateway.WithPresenceOpts(
 				gateway.WithOnlineStatus(discord.OnlineStatusOnline),
-				gateway.WithCustomActivity("Being the best utility bot"),
+				gateway.WithPlayingActivity("Fortnite - FNCS Finals"),
 			),
 		),
 		bot.WithEventListenerFunc(func(e *events.Ready) {

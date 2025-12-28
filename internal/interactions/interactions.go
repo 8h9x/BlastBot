@@ -6,17 +6,19 @@ import (
 
 	"github.com/8h9x/BlastBot/internal/interactions/accounts"
 	"github.com/8h9x/BlastBot/internal/interactions/auto"
-//	"github.com/8h9x/BlastBot/internal/interactions/claim"
-//	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
+
+	//	"github.com/8h9x/BlastBot/internal/interactions/claim"
+	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/internal/interactions/cosmetic"
 	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
-//	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
-//	"github.com/8h9x/BlastBot/internal/interactions/redeem"
-//	"github.com/8h9x/BlastBot/internal/interactions/showtoken"
-//	"github.com/8h9x/BlastBot/internal/interactions/test"
+
+	//	"github.com/8h9x/BlastBot/internal/interactions/mnemonic"
+	//	"github.com/8h9x/BlastBot/internal/interactions/redeem"
+	//	"github.com/8h9x/BlastBot/internal/interactions/showtoken"
+	//	"github.com/8h9x/BlastBot/internal/interactions/test"
 	"github.com/8h9x/BlastBot/internal/interactions/winterfest"
 	"github.com/8h9x/fortgo/request"
 	"github.com/disgoorg/disgo/bot"
@@ -38,15 +40,15 @@ type Command struct {
 
 var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 	return func(event *handler.InteractionEvent) error {
-//		err := event.DeferCreateMessage(false)
-//		if err != nil {
-//			return err
-//		}
+		//		err := event.DeferCreateMessage(false)
+		//		if err != nil {
+		//			return err
+		//		}
 
-//		err := event.LaunchActivity()
-//		if err != nil {
-//			return err
-//		}
+		//		err := event.LaunchActivity()
+		//		if err != nil {
+		//			return err
+		//		}
 
 		event.Client().Logger.InfoContext(event.Ctx, "handling interaction", slog.Any("interaction", event.Interaction), slog.Any("vars", event.Vars))
 
@@ -104,14 +106,6 @@ func init() {
 			},
 		}...,
 	)
-//	RegisterCommand(cloudstorage.Definition,
-//		[]Command{
-//			{
-//				Pattern: "/cloudstorage",
-//				Handler: accounts.AddHandler,
-//			},
-//		}...,
-//	)
 	RegisterCommand(cosmetic.Definition, Command{
 		Pattern: "/cosmetic",
 		Handler: cosmetic.Handler,
@@ -136,34 +130,37 @@ func init() {
 		Pattern: "/mcp",
 		Handler: mcp.Handler,
 	})
-//	RegisterCommand(mnemonic.Definition,
-//		[]Command{
-//			{
-//				Pattern: "/mnemonic/info",
-//				Handler: mnemonic.InfoHandler,
-//			},
-//			{
-//				Pattern: "/mnemonic/favorites/add",
-//				Handler: mnemonic.FavoriteAddHandler,
-//			},
-//		}...,
-//	)
-//	RegisterCommand(redeem.Definition, Command{
-//		Pattern: "/redeem",
-//		Handler: redeem.Handler,
-//	})
-//	RegisterCommand(showtoken.Definition, Command{
-//		Pattern: "/showtoken",
-//		Handler: showtoken.Handler,
-//	})
-//	RegisterCommand(test.Definition, Command{
-//		Pattern: "/componenttest",
-//		Handler: test.Handler,
-//	})
+	//	RegisterCommand(mnemonic.Definition,
+	//		[]Command{
+	//			{
+	//				Pattern: "/mnemonic/info",
+	//				Handler: mnemonic.InfoHandler,
+	//			},
+	//			{
+	//				Pattern: "/mnemonic/favorites/add",
+	//				Handler: mnemonic.FavoriteAddHandler,
+	//			},
+	//		}...,
+	//	)
+	//	RegisterCommand(redeem.Definition, Command{
+	//		Pattern: "/redeem",
+	//		Handler: redeem.Handler,
+	//	})
+	// RegisterCommand(showtoken.Definition, Command{
+	// 	Pattern: "/showtoken",
+	// 	Handler: showtoken.Handler,
+	// })
+	//	RegisterCommand(test.Definition, Command{
+	//		Pattern: "/componenttest",
+	//		Handler: test.Handler,
+	//	})
 	RegisterCommand(winterfest.Definition, Command{
 		Pattern: "/winterfest",
 		Handler: winterfest.Handler,
 	})
+
+	definitions = append(definitions, cloudstorage.Definition)
+	cloudstorage.Register(Router)
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {

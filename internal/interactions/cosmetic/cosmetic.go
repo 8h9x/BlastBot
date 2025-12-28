@@ -11,23 +11,45 @@ var Definition = discord.SlashCommandCreate{
 }
 
 func Handler(event *handler.CommandEvent) error {
+	inline := true
+
 	err := event.CreateMessage(discord.MessageCreate{
-		Flags: discord.MessageFlagIsComponentsV2,
-		Components: []discord.LayoutComponent{
-			discord.NewContainer(
-				discord.SectionComponent{
-					Components: []discord.SectionSubComponent{
-						discord.NewTextDisplay("### OUTFIT"),
-						discord.NewTextDisplay("Iconic Kim Kardashian"),
-					},
-					Accessory: discord.NewThumbnail("https://fortnite-api.com/images/cosmetics/br/Character_QuicheLorraineLime/icon.png"),
+		Embeds: []discord.Embed{{
+			Title:       "Iconic Kim Kardashian",
+			Description: "Mogul. Mom. Icon.",
+			Thumbnail: &discord.EmbedResource{
+				URL: "https://fortnite-api.com/images/cosmetics/br/Character_QuicheLorraineLime/icon.png",
+			},
+			Color: 0x5cf2f3,
+			Fields: []discord.EmbedField{
+				{
+					Name:   "ID",
+					Value:  "Character_QuicheLorraineLime",
+					Inline: &inline,
 				},
-				discord.NewActionRow(
-					discord.NewButton(discord.ButtonStyleSuccess, "Equip", "next-sectidon", "", 0),
-					discord.NewButton(discord.ButtonStylePrimary, "Favorite", "next-sectdidon", "", 0),
-					discord.NewButton(discord.ButtonStylePrimary, "Purchase", "next-secteedidon", "", 0),
-					discord.NewButton(discord.ButtonStylePrimary, "Wishlist", "next-seeectdidon", "", 0),
-					),
+				{
+					Name:   "Type",
+					Value:  "Outfit",
+					Inline: &inline,
+				},
+				{
+					Name:   "Series",
+					Value:  "Icon Series",
+					Inline: &inline,
+				},
+				{
+					Name:   "Introduced",
+					Value:  "Chapter 7, Season 1.",
+					Inline: &inline,
+				},
+			},
+		}},
+		Components: []discord.LayoutComponent{
+			discord.NewActionRow(
+				discord.NewButton(discord.ButtonStyleSuccess, "Equip", "next-sectidon", "", 0),
+				discord.NewButton(discord.ButtonStylePrimary, "Favorite", "next-sectdidon", "", 0),
+				discord.NewButton(discord.ButtonStylePrimary, "Purchase", "next-secteedidon", "", 0),
+				discord.NewButton(discord.ButtonStylePrimary, "Wishlist", "next-seeectdidon", "", 0),
 			),
 		},
 	})

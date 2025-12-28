@@ -3,7 +3,7 @@ module github.com/8h9x/BlastBot
 go 1.24.4
 
 require (
-	github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723
+	github.com/8h9x/fortgo v0.0.0-20251227203840-08224c681263
 	github.com/disgoorg/disgo v0.19.0-rc.12.0.20251211114218-62e9632d6581
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/joho/godotenv v1.5.1
@@ -18,6 +18,7 @@ require (
 	github.com/disgoorg/omit v1.0.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.3 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
