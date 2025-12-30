@@ -20,7 +20,7 @@ func Handler(event *handler.CommandEvent) error {
 			Thumbnail: &discord.EmbedResource{
 				URL: "https://fortnite-api.com/images/cosmetics/br/Character_QuicheLorraineLime/icon.png",
 			},
-			Color: 0x5cf2f3,
+			Color: 0x2bc9ca,
 			Fields: []discord.EmbedField{
 				{
 					Name:   "ID",

@@ -10,6 +10,8 @@ github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723 h1:m1Dgov1wVO+ySKGKrJb
 github.com/8h9x/fortgo v0.0.0-20251220013902-71c678195723/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/8h9x/fortgo v0.0.0-20251227203840-08224c681263 h1:lf9VI0UQIYzQfi104nW6qe+QCjl9KrP0UGUS0z8it0k=
 github.com/8h9x/fortgo v0.0.0-20251227203840-08224c681263/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
+github.com/8h9x/fortgo v0.0.0-20251228050501-0fb80c810a0c h1:pRnxdLQdtrLrugmgfxQm8o2wrvAxP9miJ0fU0aPpMRo=
+github.com/8h9x/fortgo v0.0.0-20251228050501-0fb80c810a0c/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
 github.com/antlr4-go/antlr/v4 v4.13.0/go.mod h1:pfChB/xh/Unjila75QW7+VU4TSnWnnk9UTnmpPaOR2g=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
