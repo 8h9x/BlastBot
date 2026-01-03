@@ -10,6 +10,7 @@ import (
 	//	"github.com/8h9x/BlastBot/internal/interactions/claim"
 	"github.com/8h9x/BlastBot/internal/interactions/cloudstorage"
 	"github.com/8h9x/BlastBot/internal/interactions/cosmetic"
+	"github.com/8h9x/BlastBot/internal/interactions/friends"
 	"github.com/8h9x/BlastBot/internal/interactions/launch"
 	"github.com/8h9x/BlastBot/internal/interactions/login"
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
@@ -161,6 +162,9 @@ func init() {
 
 	definitions = append(definitions, cloudstorage.Definition)
 	cloudstorage.Register(Router)
+
+	definitions = append(definitions, friends.Definition)
+	friends.Register(Router)
 }
 
 func RegisterCommand(def discord.ApplicationCommandCreate, cmds ...Command) {
