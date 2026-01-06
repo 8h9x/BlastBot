@@ -76,7 +76,7 @@ func Handler(event *handler.CommandEvent) error {
 			discord.NewContainer(
 				discord.NewTextDisplayf("## Launch Fortnite on Windows as %s", me.DisplayName),
 				discord.NewTextDisplay("Paste the following text into a Windows Command Prompt (cmd.exe) and press `Enter`."),
-				discord.NewTextDisplayf("```powershell\ncmd | start /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s\n```", launcherExchange.Code, exchangeCredentials.AccountID),
+				discord.NewTextDisplayf("```powershell\ncmd /c 'start /d \"%%PROGRAMFILES%%\\Epic Games\\Fortnite\\FortniteGame\\Binaries\\Win64\" FortniteLauncher.exe -AUTH_LOGIN=unused -AUTH_PASSWORD=%s -AUTH_TYPE=exchangecode -epicapp=Fortnite -epicenv=Prod  -EpicPortal -epicsandboxid=fn -epicuserid=%s'\n```", launcherExchange.Code, exchangeCredentials.AccountID),
 				discord.NewTextDisplayf("Expires <t:%d:R>", time.Now().Add(5*time.Minute).Unix()),
 			),
 		},
