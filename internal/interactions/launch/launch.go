@@ -64,7 +64,7 @@ func Handler(event *handler.CommandEvent) error {
 		return err
 	}
 
-	launcherExchange, err := auth.GetExchangeCode(session.HTTPClient, exchangeCredentials)
+	launcherExchange, err := auth.GetExchangeCode(session.HTTPClient, &exchangeCredentials)
 	if err != nil {
 		return err
 	}
