@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-    "github.com/8h9x/BlastBot/internal/sessions"
+	"github.com/8h9x/BlastBot/internal/sessions"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )
@@ -38,6 +38,7 @@ var Definition = discord.SlashCommandCreate{
 				{Name: "theater1 (STW Event Backpack)", Value: "theater1"},
 				{Name: "theater2 (STW Ventures Data)", Value: "theater2"},
 				{Name: "recycle_bin (STW Recylce Bin)", Value: "recycle_bin"},
+				{Name: "proto_juno (ProtoJuno/Lego)", Value: "proto_juno"},
 			},
 			Required: true,
 		},
