@@ -1,15 +1,16 @@
 package scheduler
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/robfig/cron"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/robfig/cron"
+
 	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/fortnite"
+	"github.com/8h9x/fortgo/mcp"
 	"github.com/8h9x/fortgo/request"
 )
 
@@ -39,8 +40,8 @@ type TokenItemAttributes struct {
 	Level int `json:"level"`
 }
 
-type WinterfestGiftService struct{
-	cron cron.Cron
+type WinterfestGiftService struct {
+	cron                  cron.Cron
 	RewardGraphTemplateID string
 }
 
@@ -69,7 +70,7 @@ func (s *WinterfestGiftService) OpenGift(client fortgo.Client, rewardNodeID stri
 		return fmt.Errorf("WinterfestGiftService: unable to claim rewardNode: %s\n%s", rewardNodeID, err)
 	}
 
-	profileRes, err := request.ParseResponse[fortnite.Profile[fortnite.AthenaProfileStats, []any]](res)
+	profileRes, err := request.ParseResponse[mcp.Profile](res)
 	if err != nil {
 		return fmt.Errorf("unable to parse ClientQuestLogin response: %s", err)
 	}
@@ -77,25 +78,17 @@ func (s *WinterfestGiftService) OpenGift(client fortgo.Client, rewardNodeID stri
 	items := profileRes.Data.ProfileChanges[0].Profile.Items
 
 	var rewardGraphID string
-	var rewardGraphItem RewardGraphItem
 
 	for key, value := range items {
-		var item RewardGraphItem
-		if err = json.Unmarshal(value, &item); err != nil {
-			// not a skin; (you should probably add an additional check to ensure that it isn't some other type of error occurring); TODO: abstract this to a helper function that properly error checks and returns an empty state of the type passed if the type of data doesnt match
-			continue
-		}
-
-		if strings.HasPrefix(item.TemplateID, s.RewardGraphTemplateID) {
+		if strings.HasPrefix(value.TemplateID, s.RewardGraphTemplateID) {
 			rewardGraphID = key
-			rewardGraphItem = item
 		}
 	}
 
 	payload := fortnite.UnlockRewardNodePayload{
-		NodeID: rewardNodeID,
+		NodeID:        rewardNodeID,
 		RewardGraphID: rewardGraphID,
-		RewardCFG: "",
+		RewardCFG:     "",
 	}
 
 	unlockRes, err := client.UnlockRewardNode(payload)

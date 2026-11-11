@@ -6,7 +6,7 @@ import (
 
 	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/fortgo"
-	"github.com/8h9x/fortgo/auth"
+	"github.com/8h9x/fortgo/account"
 	"github.com/disgoorg/snowflake/v2"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -16,7 +16,7 @@ import (
 
 var sessions = make(map[string]*fortgo.Client, 0)
 
-func CreateSession(httpClient *http.Client, credentials auth.TokenResponse) (*fortgo.Client, error) {
+func CreateSession(httpClient *http.Client, credentials account.TokenResponse) (*fortgo.Client, error) {
 	session := fortgo.NewClient(&http.Client{}, credentials)
 
 	err := session.Connect()
@@ -49,7 +49,7 @@ func GetSessionForUser(discordId snowflake.ID) (*fortgo.Client, error) {
 
 		httpClient := &http.Client{}
 
-		credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadRefreshToken{
+		credentials, err := account.Authenticate(httpClient, account.FortnitePS4USClient, account.TokenPayloadRefreshToken{
 			RefreshToken: activeAccount.RefreshToken,
 		}, false)
 		if err != nil {

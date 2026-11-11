@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/sessions"
-	"github.com/8h9x/fortgo/auth"
+	"github.com/8h9x/fortgo/account"
 	"github.com/8h9x/fortgo/consts"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -49,22 +49,22 @@ func Handler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to get session for user (%s): %s", discordId, err)
 	}
 
-	me, err := session.FetchMe()
+	me, err := session.AccountService.GetUserByID(session.CurrentCredentials().AccountID)
 	if err != nil {
 		return fmt.Errorf("unable to fetch me: %s", err)
 	}
 
-	exchange, err := session.GetExchangeCode()
+	exchange, err := account.GetExchangeCode(session.HTTPClient, session.CurrentCredentials())
 	if err != nil {
 		return err
 	}
 
-	exchangeCredentials, err := auth.Authenticate(session.HTTPClient, &auth.AuthClient{consts.LauncherClientID, consts.LauncherClientSecret}, auth.PayloadExchangeCode{exchange.Code}, true) //client.Epic.ExchangeCodeLogin(consts.LAUNCHER_CLIENT_ID, consts.LAUNCHER_CLIENT_SECRET, exchange.Code)
+	exchangeCredentials, err := account.Authenticate(session.HTTPClient, &account.AuthClient{consts.LauncherClientID, consts.LauncherClientSecret}, account.TokenPayloadExchangeCode{exchange.Code}, true) //client.Epic.ExchangeCodeLogin(consts.LAUNCHER_CLIENT_ID, consts.LAUNCHER_CLIENT_SECRET, exchange.Code)
 	if err != nil {
 		return err
 	}
 
-	launcherExchange, err := auth.GetExchangeCode(session.HTTPClient, &exchangeCredentials)
+	launcherExchange, err := account.GetExchangeCode(session.HTTPClient, &exchangeCredentials)
 	if err != nil {
 		return err
 	}

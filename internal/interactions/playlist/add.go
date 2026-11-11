@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
-    "github.com/8h9x/BlastBot/internal/sessions"
+	"github.com/8h9x/BlastBot/internal/sessions"
 	"github.com/8h9x/fortgo/links"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )
-
 
 func FavoriteAddHandler(event *handler.CommandEvent) error {
 	discordId := event.User().ID
@@ -32,20 +31,15 @@ func FavoriteAddHandler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to marshal mnemonic data: %s", err)
 	}
 
-	embed := discord.NewEmbedBuilder().
-		SetColor(0xFB2C36).
-		SetTimestamp(time.Now()).
-		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
-		SetDescriptionf("```json\n%s\n```", mnemonicDataRaw)
+	embed := discord.NewEmbed().
+		WithColor(0xFB2C36).
+		WithTimestamp(time.Now()).
+		WithTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+		WithDescriptionf("```json\n%s\n```", mnemonicDataRaw)
 
-	event.CreateMessage(discord.NewMessageCreateBuilder().
-		SetEmbeds(embed.
-			Build(),
-		).
-		Build(),
-	)
+	event.CreateMessage(discord.NewMessageCreate().WithEmbeds(embed))
 
-	me, err := session.FetchMe()
+	me, err := session.AccountService.GetUserByID(session.CurrentCredentials().AccountID)
 	if err != nil {
 		return fmt.Errorf("unable to fetch me: %s", err)
 	}

@@ -65,18 +65,13 @@ func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
 		slog.Error("interation handling error:", e.Error())
 	}
 
-	embed := discord.NewEmbedBuilder().
-		SetColor(0xFB2C36).
-		SetTimestamp(time.Now()).
-		SetTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
-		SetDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error())
+	embed := discord.NewEmbed().
+		WithColor(0xFB2C36).
+		WithTimestamp(time.Now()).
+		WithTitle("<:exclamation:1096641657396539454> We hit a roadblock!").
+		WithDescriptionf("If this issue persists, join our [support server](https://discord.gg/astra-921104988363694130)```\n%s\n```", err.Error())
 
-	event.CreateMessage(discord.NewMessageCreateBuilder().
-		SetEmbeds(embed.
-			Build(),
-		).
-		Build(),
-	)
+	event.CreateMessage(discord.NewMessageCreate().WithEmbeds(embed))
 }
 
 func init() {

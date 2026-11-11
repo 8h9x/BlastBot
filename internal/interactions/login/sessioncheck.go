@@ -3,7 +3,7 @@ package login
 import (
 	"fmt"
 
-    "github.com/8h9x/BlastBot/internal/sessions"
+	"github.com/8h9x/BlastBot/internal/sessions"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )
@@ -21,7 +21,7 @@ func SessionCheckHandler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to get session for user (%s): %s", discordId, err)
 	}
 
-	me, err := session.FetchMe()
+	me, err := session.AccountService.GetUserByID(session.CurrentCredentials().AccountID)
 	if err != nil {
 		return fmt.Errorf("unable to fetch me: %s", err)
 	}

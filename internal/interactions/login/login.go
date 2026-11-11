@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/database"
-    "github.com/8h9x/BlastBot/internal/sessions"
-	"github.com/8h9x/fortgo/auth"
+	"github.com/8h9x/BlastBot/internal/sessions"
+	"github.com/8h9x/fortgo/account"
 	"github.com/8h9x/fortgo/consts"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -32,15 +32,15 @@ var Definition = discord.SlashCommandCreate{
 
 func Handler(event *handler.CommandEvent) error {
 	httpClient := &http.Client{}
-	eosClient := &eos.Client{httpClient}
+	eosClient := &eos.Client{HttpClient: httpClient}
 
-//	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
+	//	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
 	clientCredentials, err := eosClient.GetClientCredentials(consts.UEFNClientID, consts.UEFNClientSecret)
 	if err != nil {
 		return err
 	}
 
-//	deviceAuthorization, err := auth.GetDeviceCode(httpClient, clientCredentials)
+	//	deviceAuthorization, err := auth.GetDeviceCode(httpClient, clientCredentials)
 	deviceAuthorization, err := eosClient.GetDeviceCode(clientCredentials)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func Handler(event *handler.CommandEvent) error {
 		}
 	}
 
-	refreshCredentials, err := auth.Authenticate(httpClient, &auth.AuthClient{consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret}, auth.PayloadRefreshToken{refreshPayload.JTI}, false)
+	refreshCredentials, err := account.Authenticate(httpClient, &account.AuthClient{consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret}, account.TokenPayloadRefreshToken{refreshPayload.JTI}, false)
 	if err != nil {
 		return err
 	}
@@ -148,16 +148,15 @@ func Handler(event *handler.CommandEvent) error {
 
 	avatarURL := fmt.Sprintf("https://fortnite-api.com/images/cosmetics/br/%s/icon.png", strings.Replace(avatar.AvatarID, "ATHENACHARACTER:", "", -1))
 
-	_, err = event.CreateFollowupMessage(discord.NewMessageCreateBuilder().
-		// ClearContainerComponents().
-		SetEmbeds(discord.NewEmbedBuilder().
-			SetColor(0xFB5A32).
-			SetTimestamp(time.Now()).
-			SetAuthorIcon(avatarURL).
-			SetAuthorNamef("New account saved for %s", event.User().Username).
-			SetDescriptionf("Successfully logged into **%s**\nYou now have (%d/25) saved accounts.", accountInfo.DisplayName, len(userEntry.Accounts)+1).
-			Build()).
-		Build(),
+	_, err = event.CreateFollowupMessage(discord.NewMessageCreate().
+		//		ClearComponents().
+		AddEmbeds(discord.NewEmbed().
+			WithColor(0xFB5A32).
+			WithTimestamp(time.Now()).
+			WithAuthorIcon(avatarURL).
+			WithAuthorNamef("New account saved for %s", event.User().Username).
+			WithDescriptionf("Successfully logged into **%s**\nYou now have (%d/25) saved accounts.", accountInfo.DisplayName, len(userEntry.Accounts)+1),
+		),
 	)
 
 	return err
@@ -175,7 +174,7 @@ func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret st
 		case <-ctx.Done():
 			return eos.UserCredentials{}, ctx.Err()
 		case <-ticker.C:
-//			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
+			//			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
 			credentials, err := c.DeviceCodeLogin(clientID, clientSecret, deviceCode)
 			if err != nil {
 				fmt.Println(err)
@@ -186,23 +185,23 @@ func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret st
 	}
 }
 
-func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interval, timeout time.Duration) (auth.TokenResponse, error) {
+func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interval, timeout time.Duration) (account.TokenResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	payload := auth.PayloadDeviceCode{
+	payload := account.TokenPayloadDeviceCode{
 		DeviceCode: deviceCode,
 	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			return auth.TokenResponse{}, ctx.Err()
+			return account.TokenResponse{}, ctx.Err()
 		case <-ticker.C:
-			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
+			credentials, err := account.Authenticate(httpClient, account.FortnitePS4USClient, payload, true)
 			if err != nil {
 				continue
 			}
@@ -212,15 +211,15 @@ func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interv
 }
 
 type DecodedRefreshTokenJwtPayload struct {
-    AUD   string `json:"aud"`
-    SUB   string `json:"sub"`
-    T     string `json:"t"`
-    AppID string `json:"appid"`
-    Scope string `json:"scope"`
-    ISS   string `json:"iss"`
-    DN    string `json:"dn"`
-    EXP   int    `json:"exp"`
-    IAT   int    `json:"iat"`
-    JTI   string `json:"jti"`
-    Pfpid string `json:"pfpid"`
+	AUD   string `json:"aud"`
+	SUB   string `json:"sub"`
+	T     string `json:"t"`
+	AppID string `json:"appid"`
+	Scope string `json:"scope"`
+	ISS   string `json:"iss"`
+	DN    string `json:"dn"`
+	EXP   int    `json:"exp"`
+	IAT   int    `json:"iat"`
+	JTI   string `json:"jti"`
+	Pfpid string `json:"pfpid"`
 }

@@ -78,9 +78,8 @@ func Handler(event *handler.CommandEvent) error {
 	// 	return err
 	// }
 
-	err = event.CreateMessage(discord.NewMessageCreateBuilder().
-		AddFile(fmt.Sprintf("profile_%s_%d.json", profileId, time.Now().Unix()), "Profile operation response.", res.Body).
-		Build(),
+	err = event.CreateMessage(discord.NewMessageCreate().
+		AddFile(fmt.Sprintf("profile_%s_%d.json", profileId, time.Now().Unix()), "Profile operation response.", res.Body),
 	)
 	if err != nil {
 		return err

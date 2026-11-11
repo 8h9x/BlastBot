@@ -43,18 +43,13 @@ func Handler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to marshal code data: %s", err)
 	}
 
-	embed := discord.NewEmbedBuilder().
-		SetColor(0xFFFFFF).
-		SetTimestamp(time.Now()).
-		SetTitle("guh!").
-		SetDescriptionf("```json\n%s\n```", codeDataRaw)
+	embed := discord.NewEmbed().
+		WithColor(0xFFFFFF).
+		WithTimestamp(time.Now()).
+		WithTitle("guh!").
+		WithDescriptionf("```json\n%s\n```", codeDataRaw)
 
-	err = event.CreateMessage(discord.NewMessageCreateBuilder().
-		SetEmbeds(embed.
-			Build(),
-		).
-		Build(),
-	)
+	err = event.CreateMessage(discord.NewMessageCreate().WithEmbeds(embed))
 	if err != nil {
 		return err
 	}
