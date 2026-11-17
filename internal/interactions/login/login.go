@@ -5,17 +5,18 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/http"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/BlastBot/internal/sessions"
+	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/account"
 	"github.com/8h9x/fortgo/consts"
+	"github.com/8h9x/fortgo/eos"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
-	"gitlab.com/8h9x/Vinderman/eos"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -25,49 +26,82 @@ const (
 	CHECK_TIMEOUT  = time.Minute * 2
 )
 
+const (
+	interval = time.Second * 10
+	timeout  = time.Minute * 2
+)
+
 var Definition = discord.SlashCommandCreate{
 	Name:        "login",
 	Description: "Login and grant Blast! access to your epic account. (alias for /accounts add)",
 }
 
-func Handler(event *handler.CommandEvent) error {
-	eosClient := &eos.Client{HttpClient: http.DefaultClient}
+type TemporaryTokenSource struct {
+	token eos.Token
+}
 
-	//	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
-	clientCredentials, err := eosClient.GetClientCredentials(consts.UEFNClientID, consts.UEFNClientSecret)
+func (s *TemporaryTokenSource) Token(ctx context.Context) (string, error) {
+	return s.token.AccessToken, nil
+}
+
+func Handler(event *handler.CommandEvent) error {
+	src := &TemporaryTokenSource{}
+	client := eos.New(fortgo.NewHTTPClient(src))
+
+	clientToken, err := client.GetToken(
+		&account.AuthClient{
+			ID:     consts.UEFNClientID,
+			Secret: consts.UEFNClientSecret,
+		},
+		account.TokenGrantClientCredentials(),
+		account.TokenTypeDefault,
+	)
 	if err != nil {
 		return err
 	}
 
-	//	deviceAuthorization, err := auth.GetDeviceCode(httpClient, clientCredentials)
-	deviceAuthorization, err := eosClient.GetDeviceCode(clientCredentials)
+	deviceAuthorization, err := client.CreateDeviceCode(clientToken)
 	if err != nil {
 		return err
 	}
 
 	err = event.CreateMessage(discord.MessageCreate{
-		Content: fmt.Sprintf("Visit this URL: %s\nThen press 'Confirm' on the epic games login page.\n", deviceAuthorization.VerificationUriComplete),
+		Content: fmt.Sprintf("Visit this URL: %s\nThen press 'Confirm' on the epic games login page.\n", deviceAuthorization.VerificationURIComplete),
 	})
 	if err != nil {
 		return err
 	}
 
-	deviceCodeCredentials, err := waitForDeviceCodeConfirmEOS(eosClient, consts.UEFNClientID, consts.UEFNClientSecret, deviceAuthorization.DeviceCode, CHECK_INTERVAL, CHECK_TIMEOUT)
+	src.token, err = waitForConfirmAndGetToken(
+		client,
+		&account.AuthClient{
+			ID:     consts.UEFNClientID,
+			Secret: consts.UEFNClientSecret,
+		},
+		deviceAuthorization.DeviceCode,
+		interval,
+		timeout,
+	)
 	if err != nil {
 		return err
 	}
 
-	exchangeCode, err := eosClient.GetExchangeCode(deviceCodeCredentials)
+	ex, err := client.GetExchangeCode()
 	if err != nil {
 		return err
 	}
 
-	exchangeCredentials, err := eosClient.ExchangeCodeLogin(consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret, exchangeCode.Code)
+	token, err := client.GetToken(
+		account.FortnitePS4USClient,
+		account.TokenGrantExchangeCode(ex.Code),
+		account.TokenTypeDefault,
+		"offline_access",
+	)
 	if err != nil {
 		return err
 	}
 
-	decodedRefreshJWTPayload, err := base64.RawURLEncoding.DecodeString(strings.Split(exchangeCredentials.RefreshToken, ".")[1])
+	decodedRefreshJWTPayload, err := base64.RawURLEncoding.DecodeString(strings.Split(token.RefreshToken, ".")[1])
 	if err != nil {
 		return err
 	}
@@ -86,14 +120,14 @@ func Handler(event *handler.CommandEvent) error {
 		DiscordID: userId,
 		Accounts: []database.EpicAccount{
 			{
-				AccountID:        exchangeCredentials.AccountID,
+				AccountID:        token.AccountID,
 				RefreshToken:     refreshPayload.JTI,
-				RefreshExpiresAt: exchangeCredentials.RefreshExpiresAt,
+				RefreshExpiresAt: token.RefreshExpiresAt,
 				CreatedClientID:  consts.FortnitePCClientID,
 				Flags:            database.USER,
 			},
 		},
-		SelectedEpicAccountId: exchangeCredentials.AccountID,
+		SelectedEpicAccountId: token.AccountID,
 		BulkFlags:             database.USER,
 		CreatedAt:             time.Now(),
 		UpdatedAt:             time.Now(),
@@ -104,9 +138,9 @@ func Handler(event *handler.CommandEvent) error {
 	_, err = database.Fetch[database.User]("users", bson.M{"discordId": userId})
 	if err == nil { // user exists
 		_, err := col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$push": bson.M{"accounts": bson.M{
-			"accountId":        exchangeCredentials.AccountID,
+			"accountId":        token.AccountID,
 			"refreshToken":     refreshPayload.JTI,
-			"refreshExpiresAt": exchangeCredentials.RefreshExpiresAt,
+			"refreshExpiresAt": token.RefreshExpiresAt,
 			"clientId":         consts.FortnitePCClientID,
 			"flags":            database.USER,
 		}}}, options.UpdateOne().SetUpsert(true))
@@ -114,7 +148,7 @@ func Handler(event *handler.CommandEvent) error {
 			return err
 		}
 
-		_, err = col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$set": bson.M{"selectedEpicAccountId": exchangeCredentials.AccountID}})
+		_, err = col.UpdateOne(context.Background(), bson.M{"discordId": userId}, bson.M{"$set": bson.M{"selectedEpicAccountId": token.AccountID}})
 		if err != nil {
 			return err
 		}
@@ -156,7 +190,7 @@ func Handler(event *handler.CommandEvent) error {
 	return err
 }
 
-func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret string, deviceCode string, interval, timeout time.Duration) (eos.UserCredentials, error) {
+func waitForConfirmAndGetToken(client *eos.Client, authClient *account.AuthClient, deviceCode string, interval, timeout time.Duration) (eos.Token, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -166,15 +200,22 @@ func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret st
 	for {
 		select {
 		case <-ctx.Done():
-			return eos.UserCredentials{}, ctx.Err()
+			return eos.Token{}, ctx.Err()
 		case <-ticker.C:
-			//			credentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, payload, true)
-			credentials, err := c.DeviceCodeLogin(clientID, clientSecret, deviceCode)
+			token, err := client.GetToken(
+				&account.AuthClient{
+					ID:     consts.UEFNClientID,
+					Secret: consts.UEFNClientSecret,
+				},
+				account.TokenGrantClientCredentials(),
+				account.TokenTypeDefault,
+			)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
-			return credentials, nil
+
+			return token, nil
 		}
 	}
 }

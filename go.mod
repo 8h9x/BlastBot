@@ -3,7 +3,7 @@ module github.com/8h9x/BlastBot
 go 1.26.0
 
 require (
-	github.com/8h9x/fortgo v0.0.0-20261117034144-682eef9a5319
+	github.com/8h9x/fortgo v0.0.0-20261117045415-ded6814a0c22
 	github.com/disgoorg/disgo v0.20.0
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/go-chi/chi/v5 v5.5.1-0.20261018135022-9f8adb1aabaa
@@ -11,7 +11,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron v1.2.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20251219100830-236aa1ff8acc
-	gitlab.com/8h9x/Vinderman v0.0.0-20250603230237-f74824d5c56f
 	go.mongodb.org/mongo-driver/v2 v2.9.2
 )
 
