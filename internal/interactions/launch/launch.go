@@ -54,17 +54,26 @@ func Handler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to fetch me: %s", err)
 	}
 
-	exchange, err := account.GetExchangeCode(session.HTTPClient, session.CurrentCredentials())
+	exchange, err := session.AccountService.GetExchangeCode()
 	if err != nil {
 		return err
 	}
 
-	exchangeCredentials, err := account.Authenticate(session.HTTPClient, &account.AuthClient{consts.LauncherClientID, consts.LauncherClientSecret}, account.TokenPayloadExchangeCode{exchange.Code}, true) //client.Epic.ExchangeCodeLogin(consts.LAUNCHER_CLIENT_ID, consts.LAUNCHER_CLIENT_SECRET, exchange.Code)
+	launcherClient := &account.AuthClient{
+		ID:     consts.LauncherClientID,
+		Secret: consts.LauncherClientSecret,
+	}
+
+	exchangeCredentials, err := session.AccountService.GetToken(
+		launcherClient,
+		account.TokenGrantExchangeCode(exchange.Code),
+		account.TokenTypeEG1,
+	)
 	if err != nil {
 		return err
 	}
 
-	launcherExchange, err := account.GetExchangeCode(session.HTTPClient, &exchangeCredentials)
+	launcherExchange, err := session.AccountService.GetExchangeCode()
 	if err != nil {
 		return err
 	}

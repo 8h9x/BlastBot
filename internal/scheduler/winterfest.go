@@ -70,7 +70,7 @@ func (s *WinterfestGiftService) OpenGift(client fortgo.Client, rewardNodeID stri
 		return fmt.Errorf("WinterfestGiftService: unable to claim rewardNode: %s\n%s", rewardNodeID, err)
 	}
 
-	profileRes, err := request.ParseResponse[mcp.Profile](res)
+	profileRes, err := request.DecodeResponse[mcp.Profile](res)
 	if err != nil {
 		return fmt.Errorf("unable to parse ClientQuestLogin response: %s", err)
 	}

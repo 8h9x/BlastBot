@@ -23,15 +23,19 @@ func Handler(event *handler.CommandEvent) error {
 		return fmt.Errorf("unable to get session for user (%s): %s", discordId, err)
 	}
 
-	exchange, err := account.GetExchangeCode(session.HTTPClient, session.CurrentCredentials())
+	exchange, err := session.AccountService.GetExchangeCode()
 	if err != nil {
 		return err
 	}
 
-	exchangeCredentials, err := account.Authenticate(session.HTTPClient, &account.AuthClient{"xyza7891p5D7s9R6Gm6moTHWGloerp7B", "Knh18du4NVlFs+3uQ+ZPpDCVto0WYf4yXP8+OcwVt1o"}, account.TokenPayloadExchangeCode{exchange.Code}, false) //client.Epic.ExchangeCodeLogin(consts.LAUNCHER_CLIENT_ID, consts.LAUNCHER_CLIENT_SECRET, exchange.Code)
-	if err != nil {
-		return err
-	}
+	token, err := session.AccountService.GetToken(
+		&account.AuthClient{
+			ID:     "xyza7891p5D7s9R6Gm6moTHWGloerp7B",
+			Secret: "Knh18du4NVlFs+3uQ+ZPpDCVto0WYf4yXP8+OcwVt1o",
+		},
+		account.TokenGrantExchangeCode(exchange.Code),
+		account.TokenTypeEG1,
+	)
 
 	embed := discord.NewEmbed().
 		//        WithAuthorIcon(avatarURL).
@@ -39,7 +43,7 @@ func Handler(event *handler.CommandEvent) error {
 		WithTimestamp(time.Now()).
 		//        WithAuthorNamef("Launch Fortnite on Windows as %s", me.DisplayName).
 		//        WithTitle("Type or paste the following text into a Windows Command Prompt (cmd.exe) and press `Enter`. Expires in 5 minutes.").
-		WithDescriptionf("```%s```", exchangeCredentials.AccessToken)
+		WithDescriptionf("```%s```", token.AccessToken)
 
 	err = event.CreateMessage(discord.NewMessageCreate().WithEphemeral(true).WithEmbeds(embed))
 	if err != nil {

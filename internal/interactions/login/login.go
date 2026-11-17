@@ -31,8 +31,7 @@ var Definition = discord.SlashCommandCreate{
 }
 
 func Handler(event *handler.CommandEvent) error {
-	httpClient := &http.Client{}
-	eosClient := &eos.Client{HttpClient: httpClient}
+	eosClient := &eos.Client{HttpClient: http.DefaultClient}
 
 	//	clientCredentials, err := auth.Authenticate(httpClient, auth.FortnitePS4USClient, auth.PayloadClientCredentials{}, false)
 	clientCredentials, err := eosClient.GetClientCredentials(consts.UEFNClientID, consts.UEFNClientSecret)
@@ -126,12 +125,7 @@ func Handler(event *handler.CommandEvent) error {
 		}
 	}
 
-	refreshCredentials, err := account.Authenticate(httpClient, &account.AuthClient{consts.FortnitePS4USClientID, consts.FortnitePS4USClientSecret}, account.TokenPayloadRefreshToken{refreshPayload.JTI}, false)
-	if err != nil {
-		return err
-	}
-
-	session, err := sessions.CreateSession(httpClient, refreshCredentials)
+	session, err := sessions.CreateSession(account.TokenGrantRefreshToken(refreshPayload.JTI))
 	if err != nil {
 		return err
 	}
@@ -178,31 +172,6 @@ func waitForDeviceCodeConfirmEOS(c *eos.Client, clientID string, clientSecret st
 			credentials, err := c.DeviceCodeLogin(clientID, clientSecret, deviceCode)
 			if err != nil {
 				fmt.Println(err)
-				continue
-			}
-			return credentials, nil
-		}
-	}
-}
-
-func waitForDeviceCodeConfirm(httpClient *http.Client, deviceCode string, interval, timeout time.Duration) (account.TokenResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	payload := account.TokenPayloadDeviceCode{
-		DeviceCode: deviceCode,
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return account.TokenResponse{}, ctx.Err()
-		case <-ticker.C:
-			credentials, err := account.Authenticate(httpClient, account.FortnitePS4USClient, payload, true)
-			if err != nil {
 				continue
 			}
 			return credentials, nil

@@ -16,15 +16,18 @@ import (
 
 var sessions = make(map[string]*fortgo.Client, 0)
 
-func CreateSession(httpClient *http.Client, credentials account.TokenResponse) (*fortgo.Client, error) {
-	session := fortgo.NewClient(&http.Client{}, credentials)
+func CreateSession(tokenGrant account.TokenGrant) (*fortgo.Client, error) {
+	//	session := fortgo.NewClient(&http.Client{}, credentials)
+	session := fortgo.NewClient(
+		fortgo.WithTokenGrant(tokenGrant),
+	)
 
 	err := session.Connect()
 	if err != nil {
 		return &fortgo.Client{}, fmt.Errorf("an error occured when creating fortgo client %s", err)
 	}
 
-	sessions[credentials.AccountID] = session
+	sessions[session.CurrentCredentials().AccountID] = session
 	return session, nil
 }
 
@@ -47,16 +50,17 @@ func GetSessionForUser(discordId snowflake.ID) (*fortgo.Client, error) {
 			}
 		}
 
-		httpClient := &http.Client{}
+		session := fortgo.NewClient(
+			fortgo.WithHttpClient(http.DefaultClient),
+			fortgo.WithTokenGrant(account.TokenGrantRefreshToken(activeAccount.RefreshToken)),
+		)
 
-		credentials, err := account.Authenticate(httpClient, account.FortnitePS4USClient, account.TokenPayloadRefreshToken{
-			RefreshToken: activeAccount.RefreshToken,
-		}, false)
+		err := session.Connect()
 		if err != nil {
-			return &fortgo.Client{}, fmt.Errorf("unable to generate credentials using saved refresh token: %s", err)
+			return &fortgo.Client{}, fmt.Errorf("an error occured when creating fortgo client %s", err)
 		}
 
-		CreateSession(httpClient, credentials)
+		sessions[user.SelectedEpicAccountId] = session
 	}
 
 	return sessions[user.SelectedEpicAccountId], nil

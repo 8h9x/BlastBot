@@ -1,5 +1,7 @@
 github.com/8h9x/fortgo v0.0.0-20261111190754-dc3bf2404732 h1:3TCP3JwgJbAzJdpgutGB2TJoxfjotSoYFk6k06sYEYc=
 github.com/8h9x/fortgo v0.0.0-20261111190754-dc3bf2404732/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
+github.com/8h9x/fortgo v0.0.0-20261117034144-682eef9a5319 h1:TYKd3QcCrv2Kst0VnW0oHkYOrcuXH9rCRiWr2JtSUAE=
+github.com/8h9x/fortgo v0.0.0-20261117034144-682eef9a5319/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
 github.com/antlr4-go/antlr/v4 v4.13.0/go.mod h1:pfChB/xh/Unjila75QW7+VU4TSnWnnk9UTnmpPaOR2g=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
