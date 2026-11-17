@@ -22,11 +22,6 @@ import (
 )
 
 const (
-	CHECK_INTERVAL = time.Second * 10
-	CHECK_TIMEOUT  = time.Minute * 2
-)
-
-const (
 	interval = time.Second * 10
 	timeout  = time.Minute * 2
 )
