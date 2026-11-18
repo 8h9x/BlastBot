@@ -2,6 +2,8 @@ github.com/8h9x/fortgo v0.0.0-20261117064453-67f94066a822 h1:sl6mNrT94aLdcnJvE08
 github.com/8h9x/fortgo v0.0.0-20261117064453-67f94066a822/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
 github.com/8h9x/fortgo v0.0.0-20261118020533-927afda41bcc h1:L7yETL0/k1IiQweZLFwtQcbVOfP0zOBgzgxwU3sJZE8=
 github.com/8h9x/fortgo v0.0.0-20261118020533-927afda41bcc/go.mod h1:zBwQrpTU3S3E1zIrVFWPRDPyacJnDp89dUHahLf1Yag=
+github.com/8h9x/fortgo v0.0.0-20261118213720-54bdde4069f1 h1:KIU8sLVR4ItZWIAUOkcHS/XqjLVqbkq3LiFLptKnfew=
+github.com/8h9x/fortgo v0.0.0-20261118213720-54bdde4069f1/go.mod h1:YmXgW3lj9SqvUAYxoIGQxhR7xrqtMZpz5OHlcc3RbYI=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
 github.com/antlr4-go/antlr/v4 v4.13.0/go.mod h1:pfChB/xh/Unjila75QW7+VU4TSnWnnk9UTnmpPaOR2g=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=

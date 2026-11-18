@@ -45,7 +45,7 @@ func FavoriteAddHandler(event *handler.CommandEvent) error {
 	}
 
 	err = event.CreateMessage(discord.MessageCreate{
-		Content: fmt.Sprintf("session using client: %s exists for account: %s, discord user: %s", session.ClientID, me.ID, event.User().ID.String()),
+		Content: fmt.Sprintf("session using client: %s exists for account: %s, discord user: %s", session.AuthClient().ID, me.ID, event.User().ID.String()),
 	})
 	if err != nil {
 		return err

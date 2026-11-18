@@ -2,7 +2,6 @@ package sessions
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/8h9x/BlastBot/internal/database"
 	"github.com/8h9x/fortgo"
@@ -51,7 +50,6 @@ func GetSessionForUser(discordId snowflake.ID) (*fortgo.Client, error) {
 		}
 
 		session := fortgo.NewClient(
-			fortgo.WithHttpClient(http.DefaultClient),
 			fortgo.WithTokenGrant(account.TokenGrantRefreshToken(activeAccount.RefreshToken)),
 		)
 

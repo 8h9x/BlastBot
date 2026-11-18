@@ -72,7 +72,7 @@ func startParsing(data []byte) {
 	reader.Seek(50, io.SeekStart)
 
 	fmt.Println("--- Starting Property Dump ---")
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		propName := readUEString(reader)
 		if propName == "None" || propName == "" {
 			break
