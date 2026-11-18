@@ -4,3 +4,6 @@ tmp
 
 # not done
 internal/database/schema.sql
+
+# test bot hidden hehe
+cmd/test-bot

@@ -14,7 +14,6 @@ import (
 	"github.com/8h9x/BlastBot/internal/interactions/logout"
 	"github.com/8h9x/BlastBot/internal/interactions/mcp"
 	"github.com/8h9x/BlastBot/internal/interactions/winterfest"
-	"github.com/8h9x/fortgo/request"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
@@ -52,8 +51,9 @@ var Logger handler.Middleware = func(next handler.Handler) handler.Handler {
 
 func CommandHandlerErrorRespond(event *handler.InteractionEvent, err error) {
 	switch e := err.(type) {
-	case request.Error:
-		slog.Error("interation handling error:", e.Raw)
+	// TODO: uncomment
+	// case rest.Error:
+	// 	slog.Error("interation handling error:", e.Raw)
 	default:
 		slog.Error("interation handling error:", e.Error())
 	}

@@ -6,3 +6,6 @@ tasks:
   dev:
     cmds:
       - go run ./cmd/bot
+  dev-test:
+    cmds:
+      - go run ./cmd/test-bot

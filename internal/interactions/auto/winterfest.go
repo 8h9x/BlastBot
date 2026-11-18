@@ -10,7 +10,7 @@ import (
 
 	//	"github.com/8h9x/BlastBot/internal/manager/sessions"
 	//	"github.com/8h9x/fortgo/fortnite"
-	//	"github.com/8h9x/fortgo/request"
+	//	"github.com/8h9x/fortgo/rest"
 	//	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 )

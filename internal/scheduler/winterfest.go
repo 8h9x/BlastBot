@@ -11,7 +11,7 @@ import (
 	"github.com/8h9x/fortgo"
 	"github.com/8h9x/fortgo/fortnite"
 	"github.com/8h9x/fortgo/mcp"
-	"github.com/8h9x/fortgo/request"
+	"github.com/8h9x/fortgo/rest"
 )
 
 type RawItem[T any] struct {
@@ -70,12 +70,14 @@ func (s *WinterfestGiftService) OpenGift(client fortgo.Client, rewardNodeID stri
 		return fmt.Errorf("WinterfestGiftService: unable to claim rewardNode: %s\n%s", rewardNodeID, err)
 	}
 
-	profileRes, err := request.DecodeResponse[mcp.Profile](res)
+	var profileRes mcp.Profile
+
+	err = rest.DecodeResponse(res, &profileRes)
 	if err != nil {
 		return fmt.Errorf("unable to parse ClientQuestLogin response: %s", err)
 	}
 
-	items := profileRes.Data.ProfileChanges[0].Profile.Items
+	items := profileRes.ProfileChanges[0].Profile.Items
 
 	var rewardGraphID string
 

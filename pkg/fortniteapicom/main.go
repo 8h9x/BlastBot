@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/8h9x/fortgo/request"
+	"github.com/8h9x/fortgo/rest"
 )
 
 type Client struct {
@@ -23,7 +23,7 @@ func New() *Client {
 }
 
 func (c *Client) fetchCosmetics() ([]CosmeticItem, error) {
-	req, err := request.New(
+	req, err := rest.NewRequest(
 		http.MethodGet,
 		"https://fortnite-api.com",
 		"v2/cosmetics/br",
@@ -37,16 +37,18 @@ func (c *Client) fetchCosmetics() ([]CosmeticItem, error) {
 		return []CosmeticItem{}, err
 	}
 
-	resp, err := request.DecodeResponse[CosmeticListResponse](res)
+	var data CosmeticListResponse
+
+	err = rest.DecodeResponse(res, &data)
 	if err != nil {
 		return []CosmeticItem{}, err
 	}
 
-	return resp.Data.Data, nil
+	return data.Data, nil
 }
 
 func (c *Client) fetchCosmeticByID(id string) (CosmeticItem, error) {
-	req, err := request.New(
+	req, err := rest.NewRequest(
 		http.MethodGet,
 		"https://fortnite-api.com",
 		fmt.Sprintf("v2/cosmetics/br/%s", strings.ToLower(id)),
@@ -60,16 +62,18 @@ func (c *Client) fetchCosmeticByID(id string) (CosmeticItem, error) {
 		return CosmeticItem{}, err
 	}
 
-	resp, err := request.DecodeResponse[CosmeticSearchResponse](res)
+	var data CosmeticSearchResponse
+
+	err = rest.DecodeResponse(res, &data)
 	if err != nil {
 		return CosmeticItem{}, err
 	}
 
-	return resp.Data.Data, nil
+	return data.Data, nil
 }
 
 func (c *Client) fetchCosmeticByName(name string) (CosmeticItem, error) {
-	req, err := request.New(
+	req, err := rest.NewRequest(
 		http.MethodGet,
 		"https://fortnite-api.com",
 		fmt.Sprintf("v2/cosmetics/br/search?name=%s", name),
@@ -83,12 +87,14 @@ func (c *Client) fetchCosmeticByName(name string) (CosmeticItem, error) {
 		return CosmeticItem{}, err
 	}
 
-	resp, err := request.DecodeResponse[CosmeticSearchResponse](res)
+	var data CosmeticSearchResponse
+
+	err = rest.DecodeResponse(res, &data)
 	if err != nil {
 		return CosmeticItem{}, err
 	}
 
-	return resp.Data.Data, nil
+	return data.Data, nil
 }
 
 func (c *Client) PreloadCache() error {
